@@ -1,0 +1,52 @@
+package src.main.java.EnglishQBAnsweringSessions;
+
+public class D02 {
+
+    public static void main(String[] args) {
+
+        m2(1,2,3,4);
+
+
+
+    }
+
+
+
+    public static void m2(int i,int j,int... k){
+
+        System.out.println(k.length);
+
+
+
+    }
+
+
+
+
+
+
+}
+ class Test2{
+
+    static void m2(String str,int... a){
+
+        System.out.println(str);
+        for (int i : a){
+
+            System.out.print(i+" ");
+
+        }
+        System.out.println();
+
+
+
+    }
+
+    public static void main(String[] args) {
+        m2("100",101,102);
+    }
+
+
+
+
+}
