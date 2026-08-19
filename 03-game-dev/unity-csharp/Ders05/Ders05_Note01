@@ -1,0 +1,27 @@
+using UnityEngine;
+
+public class Rotator : MonoBehaviour
+{
+    [SerializeField]
+    private float rotateSpeed;
+    
+    [SerializeField]
+    private Vector3 rotateDirection;
+    
+    [SerializeField]
+    private Space rotationSpace;
+    void Update()
+    {
+        transform.Rotate(rotateDirection, rotateSpeed * Time.deltaTime, rotationSpace);
+    }
+    
+    /*
+     * Sahnemde 3 tane kup olusturdum.
+     * Bu kupleri yan yana dizdim ve tek komutla farkli rotasyonlarda dondurecegim.
+     * Bir fonksiyon olustururken yapacagimiz islemler ile ilgili parametreleri degisken olarak tutarsak daha moduler kod yazmis oluruz.
+     * Asagidaki kod buna ornek teskil eder :
+     
+     
+     *  transform.Rotate(rotateDirection, rotateSpeed * Time.deltaTime, rotationSpace);
+     */
+}

@@ -1,0 +1,72 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private GameObject cameraPivot;
+    [SerializeField] private Animator animator;
+
+
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        _rigidbody.linearVelocity = (transform.forward * vertical * moveSpeed) + (transform.right * horizontal * moveSpeed);
+
+        _deltaMousePos = Input.mousePositionDelta; // Mouse position'i x ve y duzelmindeki degerlerini aldik.
+        
+        // Burada dikkat MOUSE un sag sol hareketini yani x degerini, CHARACTER in y degerine eklemem gerekiyor.
+        // Asagidaki eulerAngle alinarak setlenen rotasyon dogru ama bununla ugrasmak zorunda degiliz. Daha farkli bir yontemle yapacagiz. Yine de asagidaki ornek bilinse iyi olur. 
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + _deltaMousePos.x, transform.rotation.eulerAngles.z);
+        
+        // Bu daha basit bir yontem. Neden transform.up degil de Vector3.up dedik?
+        // Rotate fonksiyonu zaten icerisinde rotasyonun character in kendi lokaline gore mi globale gore mi setlenmesine olana saglayan bir yapia sahip.
+        // bu sebeple trasnform.rotation yazmak manasiz. Bu yuzden Vector3.up ile devam etmeliyiz.
+        // Rotate asagidaki gibi eger boyle birakilirsa default olarak Space.Self olarak setlenir.
+        // transform.Rotate(Vector3.up * _deltaMousePos.x);
+        
+        transform.Rotate(Vector3.up * _deltaMousePos.x, Space.World);
+        
+        // Simdi de fareyu yukari asagi hareket ettirdigimizde gelmesi gereken kamera hareketini ayarlayalim.
+        // Burada dikkat MOUSE un yukari asagi hareketini yani y degerini, CHARACTER in x degerine eklemem gerekiyor.
+        // Asagidaki kullanimda mouse yukari asagi hareketi sorunsuz calisiyor ancak 360 derecelik bir turlama yapiyor. Bunu kisitlamamiz gerekir.
+        cameraPivot.transform.Rotate(Vector3.right * _deltaMousePos.y, Space.Self);
+        
+        // Hoca burada Clamp kullanarak 2 deger arasinda kameranin yukari asagi hareketini kisitlamaya calisti ama olmadi.
+        // Sonra anlatacagim dedi.
+        // TODO : Hocaya unutursa Clamp konusunu hatirlat!
+        // float clampedX = Mathf.Clamp(cameraPivot.transform.rotation.eulerAngles.x, -35, 35);
+        // cameraPivot.transform.rotation = Quaternion.Euler(clampedX, cameraPivot.transform.rotation.eulerAngles.y, cameraPivot.transform.rotation.eulerAngles.z);
+        
+        
+        // Quaternion.Angle() fonksiyonu verilen 2 Quaternion degerini derece cinsinden aciya ceviriyor.
+        // Quaternion.AngleAxis() de bir baska kullanisli fonksiyon. Bir aci ve bir eksen degeri girip aci cinsinden bir deger uretiyor.
+        // transform.rotation = Quaternion.Angle();
+        // transform.rotation = Quaternion.AngleAxis();
+
+        // Input.mousePosition; => Farenin ekranda nerede oldugu ile alakali bize vektor bilgisi verir.
+        // Input.mousePositionDelta; => Sen fareyi hareket ettirdiginde bulundugu konumla son konum arasindaki farki vektor cinsinden verir.
+
+        // Input.GetMouseButtonDown(0); => Mobilde mouse tikini parmak olarak kabul ediyor. (ONEMLI!!!)
+
+
+
+    }
+
+}
+ 

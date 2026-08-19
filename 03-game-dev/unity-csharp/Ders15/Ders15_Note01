@@ -1,0 +1,35 @@
+namespace Ders15
+{
+    public class ProjectNotes15
+    {
+        /*
+         * Bu derste ilk once Runner projedeki bazi hatalari duzelterek basladik.
+         * Runner projede Astra kosarken jump halindeyken saga sola bastigimizda parkurdan cikiyor bunu Muhammed Freeze Position X i tikleyerek halletmisti bende olmadi bi ara bakacagim.
+         * Diger bir sorun Astra kosarken parkurda bazi engeller cifter cifter spawnlaniyor.
+         * Bunun sebebi ne?
+         * Bunun temel sebebi su : Biz sahnede ground kendi kendini spawn etsin ve parkurun sonune eklesin diye bir collider eklemistik(Duvar yapmistik ve mesh rendererini kapatmistik)
+         * Biz bir engele carpinca tamamladigimiz parkurun icinden gectigimiz collider duvari destroy olmuyor ve bizi geriye ittiginde ve arkamizda da o collider duvar oldugunda ayni parkuru ust uste iki kere spawn ediyor.
+         * Bunu GroundSpawner icerisindeki OnTriggerEnter'a Destroy(gameObject); ekleyerek cozduk.
+         
+         * Onemli bir diger konu da hoca derste FullGround spawn ettirerek ve kosulan parkuru icinde engel ve altinlarla destroy ettirerek projeyi toparladi.
+         * Onemli bir detay --> Runner projeleri bizim yaptigimiz sekilde yapildigi gibi zeminin hareket ettirilerek karakterin oldugu yerde kosmasiyla da yapilabiliyormus.
+         * Hoca ikincisini tercih etmedigini soyledi ama bu da bir yontem ve kullanimi da gayet yaygin.
+         
+         * Oyunda run animasyonunu acip icerisinde belirli zamanlara pin atip pin attigim yerlere footstep sesi eklemeye calistim.
+         * Ancak mixamodan gelen animasyon cift tikladigimda acilmadi (Read-only)
+         * Baska arkadaslarda noktalarin oldugu animasyon paneli acilabiliyorken bende acilmadi.
+         * Zaten animasyon Read-Only oldugu icin duzenleme yapmak adina animasyonu kopyalayip ayni yere yapistirdik ve adini Running_ReadWrite yaptik.
+         * Bu animasyonu Run animasyonu Inspectoruna ekledik.
+         * Animasyona cift tikladigimizda adimlarin yere degdigi muhtelif zamanlara AstraControllerdan ilgili fonksiyonu atadik.
+         * AstraController icerisinde 2 adet Audiosource actik(Right ve Left Footsteps)
+         * Audio Generator kisimlarina adimlar icin ses dosyalarini attik.
+         * Astracontroller icerisinde olusturdugumuz _leftFootstepSFX ve _rightFootstepSFX degiskenlerine de bu Audio Source'lari surukleyip biraktik.
+         * Oyunu baslatir baslatmaz adim atmamamiza ragmen adim sesi duyduk. Bunun sebei de Audio source kisimlarinda 'Play On Awake' i secili unutmamizdan dolayi. Hemen tikini kaldirdik ve sorun cozuldu.
+         * Adim seslerini 3 boyutlu edinmek adina her iki Audio Source daki Spatial blend i 2 boyutludan 3 boyutluya cektim.
+         * Background music ayak seslerini bastirir nitelikteydi cunku ayak seslerinin ikisinin de volume degerini 1 e aldik.
+         * 3D Sound Settings kisminda Max distance degerini 500 den 2000 e cikardik ancak grafikte de goruldugu uzere ses dogrudan bir dusus yasiyor ve yine duyulmuyordu.
+         * Bunu cozmek icin de Volume Rolloff u Logarithmic Rolloff dan Custom Rolloff a setledik.
+         * 3D ses alip almadigimizi test etmek icin de Cinemachine kamerasini sag tarafa bakacak sekilde aldik. Sesin bize soldan tamamen geliyor olmasi gerekiyor eger 3D sound ise ve oyle de oldu.
+         */
+    }
+}

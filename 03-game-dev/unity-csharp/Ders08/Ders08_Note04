@@ -1,0 +1,77 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private GameObject cameraPivot;
+    [SerializeField] private Animator animator;
+
+
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        
+        // Hocam peki yonumuze gore moveSpeed ayarlamasi yapabilir miyiz?
+        // Evet mesela asagidaki ornekte bunu gorebilirsin : 
+
+        moveSpeed = vertical < 0 ? 1.5f : 3; // Bu ornege gore Astra ileri yurumede 3 hiziyla giderken, geri yurumede 1.5 ile gidecek.
+        
+        animator.SetFloat("Vertical", vertical);
+        animator.SetFloat("Horizontal", horizontal);
+        
+        _rigidbody.linearVelocity = (transform.forward * vertical * moveSpeed) + (transform.right * horizontal * moveSpeed) + (Vector3.up * _rigidbody.linearVelocity.y);
+
+        _deltaMousePos = Input.mousePositionDelta; 
+       
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + _deltaMousePos.x, transform.rotation.eulerAngles.z);
+        
+        transform.Rotate(Vector3.up * _deltaMousePos.x, Space.World);
+        cameraPivot.transform.Rotate(Vector3.right * _deltaMousePos.y, Space.Self);
+    
+        // Burada ziplama ozelligini kazandirmak icin bir kod yaziyoruz
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            animator.SetTrigger("Jump");
+        }
+        
+        /*
+         * Jump ozelligini aktive etmek icin Trigger cinsinde IsJumping degiskenini Animator panelinde tanimladik.
+         * Ayrica Base movement dan Jump a gecerken IsJumping i condition olarak verdik ve Has Exit Time'i kapattik.
+         * Eger biz Astra'yi yuksek bir duvar veya bir panel ustune koyarsak ve buradan atlamasini saglarsak jump animasyonu oynar fakar bir yerde yere varmadan havada yuruyormus gibi bir goruntu ortaya cikar.
+         * Normalde bir karakter yuksek bir platformdan atladiginda isin izleme yontemi ile karakter yere vardi mi varmadi mi kontrolu yapiliyor.
+         * Ancak biz henuz bunu ogrenmedik.
+         * TODO !! Hoca bize isin izleme yontemini gostermeyi unutursa hatirlat !!!
+         * Su an icin bunu asagidaki OnCollisionEnter ve OnCollisionExit ile deneyecegiz.
+         * Bu yontem onerilmez normalde cunku asagidaki koda gore Astra'nin en ufak bir duvarla temasinda dahi bu kod calisir.
+         */
+
+    }
+    //
+    // private void OnCollisionEnter(Collision other)
+    // {
+    //     animator.SetBool("IsJumping", false);    
+    // }
+    
+    
+    /*
+     * Camera acisi ayarlarini elle uzun uzun yapmamiza gerek yok. Bunun yerine Cinemachine denilen bir eklenti kullanacagiz.
+     * Window > Package Manager > Unity Registry > Cinemachine ekleyerek kuruyoruz.
+     */
+}
+ 

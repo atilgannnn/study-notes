@@ -1,0 +1,149 @@
+using System;
+using Unity.Cinemachine;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    public CinemachineFollow cmFollow;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private Animator animator;
+
+
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        // moveSpeed = vertical < 0 ? 1.5f : 3; 
+        
+        animator.SetFloat("Vertical", vertical);
+        animator.SetFloat("Horizontal", horizontal);
+        
+        _rigidbody.linearVelocity = (transform.forward * vertical * moveSpeed) + (transform.right * horizontal * moveSpeed) + (Vector3.up * _rigidbody.linearVelocity.y);
+
+        _deltaMousePos = Input.mousePositionDelta; 
+       
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + _deltaMousePos.x, transform.rotation.eulerAngles.z);
+        
+        transform.Rotate(Vector3.up * _deltaMousePos.x, Space.World);
+        
+        // Follow Offset Y degerini mouse'un Y degeriyle esitledik. Ancak cok sert bir mouse hareketi oldu. bu yuzden mouseSensitivity ile de carptik.
+        cmFollow.FollowOffset += new Vector3(0, _deltaMousePos.y * mouseSensitivity, 0);
+    
+        // Mouse hareketi ile cok yukari ve cok asagi hareketler yapti 360 derece misali. Biz de daraltmak icin Clampledik. 
+        cmFollow.FollowOffset.y = Mathf.Clamp(cmFollow.FollowOffset.y, 0, 5);
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            animator.SetTrigger("Jump");
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            animator.SetBool("IsRunning", true);
+
+            moveSpeed += 3;
+        }
+        
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            animator.SetBool("IsRunning", false);
+            
+            moveSpeed -= 3;
+        }
+        
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            animator.SetBool("IsCrouching", true);
+
+            moveSpeed -= 1.5f;
+        }
+        
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            animator.SetBool("IsCrouching", false);
+
+            moveSpeed += 1.5f;
+        }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            animator.SetTrigger("Death");
+        }
+
+    }
+    
+    /*
+     * FPS Oyunlarda kamera genelde elimizdeki kamera character'in kafasina yerlestiriliyor. Daha once Astra icinde CameraPivot empty objesi olusturarak Main Camera'yi icine atmistik.
+     * Eger bu CameraPivot u da Astra'nin kafasina koyarsan al sana FPS kamera goruntusu :)
+     * Hoca ama FPS de genelde iskelete kamerayi eklemlemek daha sagliklidir dedi derste.
+     * Hierarchy de sag tiklayip Cinemachine > Targeted Camera > Istedigin kamerayi seciyorsun. Biz burada Follow, Free Look ve Third Person a sirayla bakacagiz.
+     * Ekledigimizde Maincamera'nin yaninda mavi bir cark ikonu geldi. Cinemachine Camera MainCamera'yi etkiliyor.
+     * Cinemachine Camera'ya geldigimizde Inspector'da Tracking Target diye bir input var. Astra'yi buraya surukleyip biraktik.
+     * Bunu yapinca Cinemachine Camera kendini otomatik Astra'yi takip edecek sekilde konumlandirdi.
+     * Simdi ince ayarlari yapiyoruz. Ancak burada onemli bir yer var. Sakin ha Transform kismina dokunma. Oradan Cinemachine Kamera ayari yapmiyoruz.
+     * Onun yerine ince ayarlari Cinemachine Follow ve Cinemachine Rotation Composer kisimlarindan hallediyoruz.
+     * Follow Offset den kameranin ne kadar yakin/uzak duracagini ayarliyoruz.
+     * Sari noktayi tam kafaya getirmek icin de Target Offset'in Y degerini degistiriyoruz.
+     * Ayarlamalari yapip oyunu baslatinca, karakterin titredigini gorduk. Bunun sebei karakter Rigidbody ile hareket ediyor.
+     * Fizik motorundaki update islemleriyle motorun kendisindeki update islemleri arasinda zamansal bir fark var.
+     * Bu zamansal fark oyundaki her seyi etkiler. Su an Camera fizik motorunu baz almiyor ama karakter fizik motorunu baz aliyor.
+     * Dolayisiyla bizim Main Camera'ya gelerek Inspector > Cinemachine Brain kismindan Update Method'lari Fized Update olarak setlememiz gerekiyor.
+     * Bu sorunu cozduk ama baska bir durum daha var hala. Camera istedigim gibi sag - sol hareketi yapmiyor.
+     * Bu noktada CinemachineCamera > Cinemachine Follow > Binding Mode > World Space oldugunu gordum.
+     * World Space normalde Top Down oyunlarda (Sims, Diablo vs) kullanilir. Burada Camera acisi World e gore ayarlanmistir.
+     * Ama bizim bunu Character'a gore ayarlamamiz gerekiyor. Biz burada Binding Mode > Lock To Target With World Up sectik.
+     * Bunu secince Rotation Damping diye yeni bir field geldi Cinemachine Follow kismina. Ayrica Cinemachine Rotation Composer'da Target Offset'in altinda da Damping var.
+     * Nedir bu Damping? Damping = Camera sag sol hareketinde donusleri yumusatmak icin kullaniliyor. Default 1 gelmis tum Damping degerleri.
+     * Biz 0.1 yapiyoruz hepsini. Hoca 0 birakmayi tavsiye etmedi.
+     
+     * Bir de Position Damping var. Bu da cameranin character'i ileri - geri hareket ederken takip etmesindeki gecikme suresini ayarliyor.
+     * Mesela Position Damping degerleri 3 verilir ve W ile character ile giderse, W dan elini cektikten 3 sn sonra Camera hafif bir zoom in ile character'e yaklasir.
+     * Biz de Position Damping'e 1.5 verdik.
+     * Peki Camera'nin yukari asagi tilt hareketini nasil veriyoruz?
+     * Bu deger Cinemachine Folow > Follow Offset degeridir. Burayi dinamik yapmak icin bu degeri kod ile guncelliyoruz.
+     
+     * public CinemachineFollow cmFollow; degiskenini olusturduktan sonra Astra'nin icinde olusan bu field a Cinemachine Camera'yi surukleyip biraktik.
+     * Ardindan cmFollow.FollowOffset += new Vector3(0, _deltaMousePos.y, 0); diyerek mousePos un Y degeri ile Follow Offset y degerini esitliyoruz.
+     * Unutma bu bir Vector3 cinsinden deger oldugu icin Vector3 aldik.
+     * Simdi bize muazzam genislikte bir yukari asagi hareketi verdi ki bunu Clamp'lememiz gerekiyor.
+     * Hala yine sert bir gecis var. Bunu duzeltmek icin interpolation yapacagiz.
+     */
+    
+    /*
+     * Hoca bu arada dedi ki bazen projelerde Cameramachine Camerasi cogaltilir, karaktere gore yukari, arka ve alta verilir.
+     * Ardindan Inspector'dan Priority ile onceliklendirme yapilarak camera oncelikli gecisler saglanir dedi.
+     */
+    
+    /*
+     * Running ve Crouching ozelliklerini de characterimize ekledik. Walking den Running ve Crouching e gerekli karsilikli Transitionlari verdik.
+     * Ancak Jumping mantigina gore dogrudan Jumping den Crouching e veya Running'e Transition kurmadik. Mantikli olmayacagini dusundugumuz icin.
+     * Aradaki gecisi Walking ile sagladik.
+     * Has Exit Time sadece Jumping den Walking e donerken Transition da acik onun disinda her yerde kapali.
+     * Animator da kullandigimiz bu yapiya "State Machine" deniyor ve Unreal Engine'de de var olan cok evrensel bir yapi bu.
+     * Tum Blend Tree'lerin basina da Blend Tree olduklarini belirtmek icin BT_ ifadesi ekledik (BT_Walking, BT_Running gibi)
+     * State Machine de oyunun herhangi bir aninda olmasi muhtemel bir eylemi/animasyonu Any State'e bagliyoruz.
+     * Oyunumuzda Astra'nin olmesi bir Any State oldugu icin olme animasyonunu State Machine icerisinde Any State'e bagladik.
+     
+     
+     * Ekstra bir bilgi :
+     * Animasyonu Inspector panelinde acip ardindan Length kismindan animasyonu croplayabiliyoruz.
+     * Ayrica animasyonun oldugu State'i Inspector da actigimizda Speed degerini degistirerek animasyon hizini arttirip azaltabiliriz.
+     */
+
+}
+ 

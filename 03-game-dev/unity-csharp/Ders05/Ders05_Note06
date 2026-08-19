@@ -1,0 +1,29 @@
+using System;
+using System.Collections;
+using UnityEngine;
+
+public class Spawner : MonoBehaviour
+{
+    [SerializeField] private GameObject characterPrefab;
+
+    [SerializeField] private float duration;
+
+    private void Start()
+    {
+        // Peki eger her 2 sn de bir spawn olmasini istesem ne yaparim?
+        // O zaman coroutine denilen bir timer yapisi kullaniriz!
+        // Coroutine yazilan fonsiyon Start icerisinde StartCoroutine() isimli bir fonksiyonda cagirilir
+        StartCoroutine(Timer());
+    }
+
+    private IEnumerator Timer()
+    {
+        // Instantiate fonskyionu spawn etmek icin uretilmis bir fonksiyon.
+        // Instantiate bizden 3 bilgi ister (Hangi obje, hangi konum,hangi rotasyona dogru)
+        Instantiate(characterPrefab, transform.position, transform.rotation);
+        
+        yield return new WaitForSeconds(duration);
+        
+        StartCoroutine(Timer());
+    }
+}

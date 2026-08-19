@@ -1,0 +1,35 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float moveSpeed;
+
+    public Transform cubeTransform;
+
+    private Quaternion _desiredRotation;
+
+    void Update()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, cubeTransform.position, moveSpeed * Time.deltaTime);
+
+        _desiredRotation = Quaternion.LookRotation(cubeTransform.position - transform.position);
+        _desiredRotation.x = 0;
+        _desiredRotation.z = 0;
+        transform.rotation = _desiredRotation;
+
+    }
+    
+    /*
+     * Eger ben kureleri kupe takip ettirmeseydim, onun yerine kupleri kube takip ettirseydim bu kup nesnelerinin hep belirli bir
+     * rotasyonda kupu takip ettigini gorurdum. yuzlerini donmezlerdi.
+     * Bunun saglayip yuzlerini donmesi icin de transform.LookAt() kullaniyoruz.
+     * transform.LookAt(cubeTransform);
+     * Bunu ayrica ben transform.rotation = Quaternion.Lookrotation() ile de yapabilirim. Ama burada ekstra yapmamiz gereken bir sey var.
+     * Burada transform.rotation = Quaternion.LookRotation(cubeTransform.position - transform.position); demeliyiz cunku bakmak istedigim yonu ister. Digerinde (LookAt fonskiyonunda) buna gerek yok ama.
+     
+     * Hoca dedi ki kendisi LookRotation'i daha cok kullaniyormus cunku spesifik detaylar eklemek konusunda LookRotation daha elverisliymis.
+     * Mesela yukaridaki ornekte _desiredRotation tanimlarken x ve z degerlerine dokunma, sadece y degerinde Lookrotation setle demis olduk.
+     */
+
+}

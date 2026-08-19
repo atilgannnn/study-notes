@@ -1,0 +1,48 @@
+using System;
+using UnityEngine;
+
+public class Door : MonoBehaviour
+{
+
+    [SerializeField] 
+    private float openYValue;
+
+    [SerializeField] 
+    private float closeYValue;
+    
+    [SerializeField] 
+    private GameObject door;
+    
+    private Vector3 _targetPosition; // Vector3(0,0,0) Burada target position (0.0.0) setlendi.
+    
+    private void Start()
+    {
+        _targetPosition = door.transform.localPosition; // Biz burada target position i lokale esitledik cunku oyun basinda kapi geriye kayiyordu!!!
+    }
+
+    private void Update()
+    {
+        if (_targetPosition != door.transform.localPosition)
+        {
+            door.transform.localPosition = Vector3.MoveTowards(door.transform.localPosition,
+                _targetPosition,
+                2 * Time.deltaTime);
+        }
+        
+        
+    }
+
+    public void OpenDoor()
+    {
+        _targetPosition = new Vector3(door.transform.localPosition.x,
+            openYValue,
+            door.transform.localPosition.z);
+    }
+
+    public void CloseDoor()
+    {
+        _targetPosition = new Vector3(door.transform.localPosition.x,
+            closeYValue,
+            door.transform.localPosition.z);
+    }
+}

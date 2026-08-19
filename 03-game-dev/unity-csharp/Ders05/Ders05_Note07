@@ -1,0 +1,18 @@
+using System;
+using UnityEngine;
+
+public class Destroyer : MonoBehaviour
+{
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Character")
+        {
+            Destroy(other.gameObject);
+        }
+    }
+    
+    /*
+     * Alternatif ve pratik bir yontem olarak Destroyer isimli bir sinif olusturduk. Mesh render i kaldirilmis bir kupten duvar yaptik.
+     * Bu kup icin is trigger i tikledik. Boylece duvara carpan her character destroy ediliyor.
+     */
+}

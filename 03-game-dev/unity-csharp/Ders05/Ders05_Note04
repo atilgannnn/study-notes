@@ -1,0 +1,42 @@
+using System.Collections;
+using UnityEngine;
+
+public class Character : MonoBehaviour
+{
+    
+    [SerializeField] private float moveSpeed;
+    
+    private Rigidbody _rigidbody;
+    
+    
+    void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+        
+        StartCoroutine(Timer());
+    }
+
+    void Update()
+    {
+        // Burada Time.deltaTime eklemedik. Neden?
+        // Fizik kullaniyorsak eklemiyoruz. Fizik motoru ayri ve bagimsiz calisiyor.
+        // Fizik motorlarinin hic birine (rigidbody gibi) Time.deltaTime eklemiyoruz!
+        _rigidbody.linearVelocity = transform.forward * moveSpeed; 
+    }
+    
+    /*
+     * Eger cok fazla nesne spawn edilirse bir sure sonra oyun kasar.
+     * Bunu onlemek icin belirli bir sure sonra spawn edilen objeleri Destroy fonksiyonuyla yok ediyoruz.
+     */
+
+    private IEnumerator Timer()
+    {
+        yield return new WaitForSeconds(10);
+        
+        Destroy(gameObject);
+    }
+    
+    /*
+     * Yukaridaki kodda Prefab olarak urettigimiz kapiya bir kapsul yurutuyoruz.
+     */
+}

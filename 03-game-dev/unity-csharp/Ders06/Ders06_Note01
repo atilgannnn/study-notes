@@ -1,0 +1,28 @@
+using UnityEngine;
+
+public class Array : MonoBehaviour
+{
+    // Array'lerde maksimum eleman sayisi bellidir. Belirlenmelidir.
+    private string[] customers = new string[5];
+    private string targetCustomer;
+    void Start()
+    {
+        // Burada dizinin [] parantez icinde belirtilen indeksine esittirden sonra gelen eleman atanir.
+        customers[0] = "Ersoy";
+        customers[1] = "Ali";
+        customers[2] = "Michael";
+        customers[3] = "Daniel";
+        customers[4] = "Jessica";
+
+        targetCustomer = customers[0];
+        Debug.Log(targetCustomer);
+    }
+    
+    /*
+     * Array ler tipki Java da oldugu gibi C# da da kullanilir.
+     * Array'ler yukarida gosterildigi gibi access turu, data turu, [] koseli parantez ve degisken adi ile tanimlanir.
+     * Esitligin diger tarafinda new string gibi bir ifade ile yeni obje olusturulur ve [5] gibi bir ifadeyle Array uzunlugu belirtilir.
+     * Array'lerde degisken tanimindaki [] icindeki sayi Array uzunlugunu(boyutunu), eleman atarken girilen [] icindeki sayi ise Array index numarasini belirtir.
+     */
+
+}

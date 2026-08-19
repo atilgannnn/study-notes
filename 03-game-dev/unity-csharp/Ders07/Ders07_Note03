@@ -1,0 +1,49 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
+    private Rigidbody _rigidbody;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        /*
+         * Asagidaki kod eski tuslama sistemine gore. Bunu su an Unity de calistirinca hata veriyor. Bi kod sistemi degisti diyor.
+         * Biz manuel olarak eski sisteme gecegiz bu asagidaki kod nasil calisiyor gormek icin. Sonra yeni sisteme geri donecegiz.
+         * Eski sistem ayari icin Unity de Edit > Project Settings > Player > Active Input Handling > Input Manager (Old) > Apply > Save
+         * Bu degisiklikten sonra Unity motoru yeniden baslatilacak ve boylece eski tus ayarlariyla devam edecegiz.
+         */
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            // Tusa bastiginizda calisir => Bir keredir. Elinizi tustan cektiginizde resetlenir.
+            Debug.Log("W ya basildi");
+        }
+        
+        if (Input.GetKey(KeyCode.W))
+        {
+            // Tusa basili tuttugunuz her frame calisir.
+            Debug.Log("W ya basili tutuyoruz");
+        }
+        
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            // Tustan elinizi cektiginizde bir kere calisir. Tekrar tusa basarsaniz resetlenir.
+        }
+        
+        
+        if (Input.GetMouseButtonDown(0))
+        {
+            // GetMouseButton larda 0 => sol tik 1 => sag tik 2 => ortadaki tekerlek
+        }
+        {
+            
+        }
+    }
+}

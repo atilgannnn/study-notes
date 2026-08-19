@@ -1,0 +1,65 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    private string name = "Atilgan";
+    
+    private int age = 20;
+
+    private float weight = 80.0f;
+
+    private Vector3 newPosition; // Vector3 aslinda uc deger tutar (x,y,z)
+    
+    void Start()
+    {
+    }
+
+    void Update()
+    {
+        transform.position += Vector3.right * (10f * Time.deltaTime);
+
+    }
+    
+    
+    /*
+     * Sahnedeki bir nesne ornegin ileri dogru (z ekseninde) nasil hareket ettirilir?
+     * Unity motorunde Transform kisminda position icerisindeki z ekseninin degeri degisecek tabikide.
+     * Oyleyse benim burada bu kisim ile ilgili bir kod yazmam gerekiyor.
+     * transform.position = dedik ama position ne degeri donduruyor? Vector3 donduruyor. O halde Vector3 degerinde bir degisken olusturmam gerekir.
+     */
+    
+    /*
+     * transform.position su sekilde calisir :
+     * transform.position = (Su anki konum) + (eksen * miktar)
+     * transform.position =         |________>    z       5
+     * transform.position = transform.position + (Vector3.forward * 5);
+     * transform.position = transform.position + (Vector3.up * 5);
+     * transform.position = transform.position + (Vector3.right * 5);
+     
+     * Vector3.forward => z ekseninde hareket (ileriye dogru) 
+     * Vector3.up => y ekseninde hareket (yukariya dogru) 
+     * Vector3.right => x ekseninde hareket (saga dogru) 
+     */
+    
+    /*
+     * Burada transform.position'i iki kere yazmama gerek yok. Soyle yapabilirim :
+     * transform.position = transform.position + (Vector3.forward * 0.01f); YERINE
+     * transform.position += Vector3.right * 10f; diyebilirim.
+     * Burada ayrica dikkat edilmesi gereken bir sey var!!!
+     * Update fonsiyonu her frame icin calistigindan eger ben bu kodu boyle birakirsam sahnede nesne hareket ederken tekleyecek.
+     * Bunun sebebi frameler arasi zaman farki!
+     
+        * ****************************
+        *    1ms       0.5ms         *  
+        *     ^         ^            *  
+        * _0_  _1_  _2_  _3_  _4_    *  
+        *         v         v        *  
+        *        2ms       1ms       *  
+        * ****************************
+     
+     * Iste bunu cozmek icin hizi Time.deltaTime ile carpmamiz gerekiyor ki bu tekleme olmasin.
+     * transform.position += Vector3.right * (10f * Time.deltaTime);
+     */
+    
+}

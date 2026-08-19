@@ -1,0 +1,39 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float forwardSpeed = 5;
+    
+    public Vector3 targetPosition;
+    
+    private Vector3 _directionVector;
+    
+    void Start()
+    {
+        transform.position = targetPosition; // Ben bunu Start fonksiyonu icinde yaparsam oyun basinda kup buraya isinlanir.
+    }
+
+    void Update()
+    {
+        _directionVector = (targetPosition - transform.position).normalized; // (B - A).normalized oldu.
+
+        transform.position += _directionVector * forwardSpeed * Time.deltaTime; // Bu yonde bu hizda hareket et dedik.
+    }
+    
+    /*
+     * Simdi burada kadar serbest hareketleri inceledik. Peki eger ben sahnedeki nesnemin bir konumdan digerine gitmesini istiyorsam ne yapmaliyim?
+     
+     * Mesela koordinat sisteminde bir nesnem var. A noktasinda ve koordinatlari A(3,1).
+     * Bu nesne B noktasina gidecek. B(1,4)
+     * Basit trigonometride soyle yapariz : (B - A) + A yani Varilacak koordinattan bulunan koordinati cikaririz aradaki farki bulunulan koordinata ekleriz.
+     * (1, 4) - (3, 1) = (-2, 3) bulunur.
+     * Bunu da A'nin koordinati ile toplarsak (-2, 3) + (3, 1) = (1, 4) bulunur. E bu zaten B noktasinin koordinati.
+     * (B - A) + A mantiginda zaten A lar birbirini goturuyor. Sadece B kaliyor.
+     
+     
+     
+     * Peki aradaki farki bulduk => (B - A ) = (-2, 3) cikti. Yonunu nasil karar veriyor?
+     * Bu noktada bulunan farki (B - A) yi normalize edersek birim vektorde yonunu buluruz. Yani konum vertorunu birim vektore ceviriyoruz.
+     */
+}

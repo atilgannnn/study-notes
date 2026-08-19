@@ -1,0 +1,188 @@
+namespace Ders09
+{
+    public class ProjectNotes09
+    {
+        /*
+         * Bu derste Runner Projemize basladik ve bu kisimda projeyi ayri bir dosyada, klasor yapisini koruyarak tuttum.
+         * Bu yuzden dersteki tum notlari burada toplamaya karar verdim.
+         * Cok detayli ve keyifli bir calisma yapiyoruz burada.
+         
+         * Projeye baslarken Assets icerisinde 'Runner' isminde bir yeni klasor olusturduk.
+         * Bu kalsorun icerisinde de Prefabs, Scripts, Materials, Shaders, Textures, Models, Animations, Sounds ve UI klasorlerini olusturduk.
+         * Buradaki klasorlerin hepsi bir oyunu olusturan elementler.
+         
+         
+         * Runner oyunlarinda uzun bir platform olur. Biz endless runner yapiyoruz.
+         * Bu tarz oyunlarda saga veya sola dogru parmaginizi kaydirdiginizda character sag sol konum degistirir.
+         * Runner oyunlarinda sadece sag sol ve ziplama hareketi olur. Ileri geri hareket (W-S) olmaz.
+         * Engeller karakterin yolu uzerine serpistirilir. Bu serpistirme rastgele yapilir ama her zaman serit ustundedir, Serit ortasinda degildir.
+         * Ayrica character'in uzerinde kostugu platformun da surekli kendini uretmesi gerekir. Bu sebeple ground un spawn edilmesi gerekir.
+         * Sahnelerde her zaman gereksiz ve bir daha gorunmeyecek nesneleri tutma. Ram'de yer tutar ve kasar.
+         
+         * 1 Tane M_Ground adinda bir material olusturduk. Ardindan Base Map'den Texture'i Checker sectik. sonra yuzeydeki parlamayi kapatmak icin smoothness'i en dusuk ayara getirdik.
+         * Runner karakterimiz Astra'yi sahneye aldik. Ancak Astra'yi kirip (Unpack edip) adini RunnerCharacter olarak degistirdik.
+         * Ardindan bu karakteri kendi Runner klasorumuz icerisindeki Prefab e surukleyip biraktik.
+         * Astra icin AstraController scriptini olusturduk. CharacterController dememizin sebebi halihazirda Unity de boyle bir component olmasi.
+         
+         * ------------------------------------------------------------------------
+         *  Ziplama icin yazdigimiz kod asagidaki gibi
+         * if(Input.GetKeydown(KeyCode.Space)) {
+         *      _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+         * }
+         * ------------------------------------------------------------------------
+         * ------------------------------------------------------------------------
+         * ForceMode'lar 4 tanedir :
+         * --> Acceleration (Dusukten yuksege artan etki/Kutleden bagimsiz bir etki uygular)
+         * --> Force (Dusukten yuksege artan etki/Kutle burada on plana cikiyor)
+         * --> Impulse (Yumruk etkisi verir/Kutle onemli)
+         * --> VelocityChange (Yumruk etkisi verir/Lutle onemsiz)
+         * ------------------------------------------------------------------------
+         
+         * Karakterin surekli ileri dogru hareket etmesi icin bir kod yazdik. Update icerisinde ama sonra zaten bunu da baska bir methodun icine aldik ve bu methodu Update'de cagirdik.
+         * _rigidbody.linearVelocity = transform.forward * moveSpeed; => Bu kod hatali.
+         * Kodu yukaridaki gibi birakirsak bir sorun yasiyoruz.
+         * Karakter yuksekten birakildiginda cok yavas dusuyor cunku yer cekimi yokmus gibi davraniyor.
+         * Peki sebebi nedir?
+         * transform.forward degeri (0,0,1) doner. Bunu misalen 10 degerinde bir moveSpeed ile carpinca yeni deger (0,0,10) olur.
+         * Yani y degeri 0 kaldigi icin boyle bir sonuc aliriz.
+         * Bunu cozmek icin soyle bir ekleme yapiyoruz. Vektor toplayarak y eksenindeki degerini ekliyoruz.
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * _rigidbody.linearVelocity = (transform.forward * moveSpeed) + (Vector3.up * _rigidbody.linearVelocity.y);
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         
+         * Ardindan sag ve sol hareket icin tuslamalari tanimladik. Bu tanimlama esnasinda farkettik ki sag ve sola basilirken tuslarla bir limitleme yok.
+         * Yani Astra ortadayken 2 kere sola giderse bosluga dusuyor veya tam tersi.
+         * Bunlari limitledik. Diger yandan saga ve sola gecisler cok sert. Bunu yumusattik.
+         
+         * Hocam peki saga sola dusmemesi icin duvar ekleseydik olmaz miydi?
+         * Tercih edilmez. Surtunmeden dolayi yavaslar evet ama karakter bu sefer duvar dibinde bir eksende gitmeye devam eder.
+         * Yumusatmak = Interpolation soyle yapilir :
+         * Vector3 desiredPosition = new Vector3(_desiredXPosition, transform.position.y, transform.position.z);
+         * transform.position = Vector3.MoveTowards(transform.position, desiredPosition, moveSpeed * Time.deltaTime);
+         
+         * Bu kodu yazinca da soyle bir hata cikti. Interpolation bitmeden ayni tusa 2 kere basilinca Astra eksenden cikti.
+         * Bunu cozmek icin _isInterpolating isimli bir boolean olusturduk, bunu da A ve D ye basilinca true ya setliyorum.
+         * Bu tuslara basilginda da bir if dongusuyle isInterpolating == false ise kontrolu yapip 2 birim saga veya sola gitme kontrolune geciyorum.
+         * Interpolation kodunu da if icerisine aliyoruz ve sonuna _isInterpolating = false; yapiyoruz. Soyle :
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * if (_isInterpolating == true) {
+         *      Vector3 desiredPosition = new Vector3(_desiredXPosition, transform.position.y, transform.position.z);
+         *      transform.position = Vector3.MoveTowards(transform.position, desiredPosition, moveSpeed * Time.deltaTime);
+         *   if (transform.position == desiredPosition) {
+         *       transform.position = desiredPosition
+         *   }
+         * }
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         
+         * Kodumuzu daha okunabilir hale getirmek icin Input, MoveCharacter, JumpCharacter ve ChangePosition gibi fonksiyonlar olusturduk.
+         * Kodlarimizi bu fonksiyonlar icerisine tasidik.
+         * Update'de Inputs ve Movecharacter i cagiriyoruz.
+         * Oyunu baslatmak icin bir tane bool turunde startGame degiskeni tanimladik.
+         * Ilgili yerlerde true veya false olarak startGame i setledik.
+         
+         * Animations klasorune gelerek sag tik ile bir tane Animator Controller olusturduk. Adini da AC_RunnerCharacter dedik.
+         * Astra'ya bir Animator componenti ekledik ve Controller kismina olusturdugumuz AC_RunnerCharacter'i surukleyip biraktik.
+         * 2 Animasyon ekledik. Idle ve Run. IsRunning isimli bir boolean paramteresi olusturduk.
+         * Make Transition ile Idle dan Run a gecis sagladik. Run'dan Idle a gecis Runner oyunlarinda yok.
+         * Transition'in Has Exit Time ini kapattik. Conditions'da IsRunning i true olarak setledik.
+         * KeyCode.T icin de SetBool ile IsRunning'i True set ettik.
+         * Daha sonra Jump state olusturduk. Run ve Jump arasinda gidis donuslu 2 transition ekliyoruz.
+         * Rundan Jump a gecerken Has Exit Time i kapattik.
+         * Ayrica Jump isimli bir Trigger parameter ekliyoruz. Bunu sadece Run dan Jump a gecerken uyguluyoruz.
+         * Tepede class basinda  _animator u cagirdik ve start da RigidBody setler gibi setledik.
+         * JumpCharacter fonksiyonu icinde _animator.SetTrigger("Jump"); dedik. Boylece Jump trigger i setlenmis oldu.
+         
+         * Daha sonra altin toplama fonksiyonu eklemek icin Gold prefab i ekledim.
+         * Gold prefab i IsTrigger kutucugunu tikledim. Carpisma olmasin triggerlansin diye.
+         * Simdi altinlari toplamak icin OnTriggerEnter kullanarak etiketlerle kontrolunu saglayip bunu yapabiliyorduk.
+         * Ancak illa ki her seyi etiketle yapmak zorunda degiliz.
+         * bu kontrolu soyle de yapabiliriz. Carpistigim seyin icinde AstraController Scripti var mi?
+         * Ya da Carpistigim seyin adi RunnerCharacter mi?
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * if(other.GetComponent<AstraController>()) veya if(other.gameObject.name == "RunnerCharacter")
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         
+         * Burada onemli olan spesifik ve bu sahnedeki objeye has olan bir seyi hedef alarak kontrol yapmaktir.
+         * Isim normalde cok tavsiye edilmez cunku isim kolayca degistirilebilir. Ya etiketle veya spesifik component ile yapmak en dogrusu.
+         * Olabildigince az tag ekleyerek ve spesifik componentler ile bunu yapmak en dogru secenek.
+         
+         *  Ek Bilgi :
+         * Astra'nin icine Rigidbody, Capsule collider, Astra controller ve animator ekledik ama bunlarin hicbiri Prefab haldeki Astra da gorunmuyor. Neden?
+         * Bir prefab de degisiklik yapildiginda hierarchy de prefab in basinda mavi bir cubuk olusuyor. Bu demek oluyor ki sahneye tasinan prefab de degisiklikler yapilmis ama bu prefab e kaydedilmemis.
+         * Bunu cozmek icin Inspector > Overrides > Apply All dememiz yeterli. Boylece ana prefab e de kaydedilecek degisiklikler.
+         
+         * Bir tane kup ostacle olusturduk sahnede. Simdi buna bir ozellik verecegiz. Amacimiz Astra kupe carpinca geriye dogru gitmesi.
+         * Carpisma mantigi oldugu icin OnCollision senaryosu var. Simdi burada da OnCollisionEnter icerisinde bir kontrol yapacagim ki carptigim Obje AstraController iceriyorsa sunu yap diyebileyim.
+         * Burada aama bir sey fark ediyoruz. OnTrigger yapilarinda other.GetComponent<AstraController>() diyebiliyorduk.
+         * Ancak simdi OnCollision yapilarinda other.transition.GetComponent<AstraController>() diyoruz.
+         * Bu fark neden var? Bunun sebebi OnTrigger'lar Collider turunde bir other degiskeni alirken OnCollision'lar Collision turunden bir other turu alir.
+         
+         * Carpisma yasandi ama geriye gitme olayi cok da duzgun calismiyor. Ilk akla gelen moveSpeed'i arttirmak oldu ama -500 yapmamiza ragmen isinlanir gibi bir goruntu verdi.
+         * Biz de bunun uzerine dusunduk neden boyle bir etki veriyor diye.
+         * Bunun sebei karakter surekli ileri dogru gitme egiliminde oldugu icin ve Update de bu surekli guncellendigi icin z ekseninde geri gitme hareketi yasanmamasi.
+         * Bunun icin bir boolean daha olusturduk. Adini da _isPushing verdik.
+         
+         * Astra icerisinde PushCharacter isimli bir fonksiyon olsuturarak bunu Obstacle icerisinde cagirdik. Public bir fonksiyon yaptik haliyle.
+         * Ancak _isPushing ile MoveCharacter icerisindeki linearVelocity'yi if dongusuyle sarmaladik ve isPushing false ise o kod calissin dedik.
+         * PushCharacter icerisinde de isPushing + true set ettik ama soyle bir sorun oldu.
+         * Karakter engele carpinca geri gitti ama ileri kosmasi durdu cunku MoveCharacter deki kod calismiyor. _isPushing = true olarak kaldi.
+         * Bunu duzeltmek icin PushCharacter fonksiyonunu void den IEnumerator a cevirdik ve coroutine kullandik.
+         *
+         * ------------------------------------------------------------------------
+         * public IEnumerator PushCharacter() {
+         *
+         *      _isPushing = true;
+         *      _rigidbody.AddForce(transform.forward * -10, ForceMode.Impulse);
+         *
+         *      yield return new WaitForSeconds(2f);
+         *      _isPushing = false;
+         * }
+         * ------------------------------------------------------------------------
+         *
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * Obstacle class icerisinde artik kodumuzu Coroutine icerisine almamiz gerekir. Bunu da soyle yaptik
+         *
+         *  private void OnCollisionEnter(Collision other) {
+         *      if(other.transform.GetComponent<AstraController>()) {
+         *
+         *          AstraController collidedController = other.transform.GetComponent<AstraController>();
+         *          StartCoroutine(collidedController.PushCharacter());
+         * 
+         *      }
+         * }
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         *        
+         * Son olarak bugun sonsuz yol dongusunu olusturduk.
+         * Olusturdugumuz plane in adini GroundPiece olarak degistirdik. Bunu prefab yaptik.
+         * Ardindan bir tane Empty Object olusturduk ve adini FullGround diye degistirdik.
+         * GroundPiece'i FullGround'un icine atarak GroundPiece'i duplicate ettik. Toplamda 5 tane GroundPiece elde ettik.
+         * Amacimiz karakter belirli bir noktaya geldiginde FullGround'u mevcut ground un bitim noktasina denk gelecek sekilde spawnlamak.
+         * Bunun icin bir Collision'a ihtiyacimiz var.
+         * Yolun ortasina bir tane kupten duvar yaptik ve Mesh Renderer'ini kapattik. Ayrica Is Trigger'ini da tikledik.
+         * Karakter Collision a carpinca FullGround spawnlanacak.
+         * Bunun icin de Groundspawner isimli bir class olsuturup icerisinde OnCollisionEnter kontrolu yapiyoruz.
+         *
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * [SerializeField] private GameObject spawnPrefab;
+         * [SerializeFiled] private Transform fullGroundTransform;
+         *
+         * private void OntriggerEnter(Collider other) {
+         *
+         *      if(other.GetComponent<AstraController>()) {
+         *
+         *          Vector3 spawnPosition = fullGroundTransform.position + new Vector3(0, 0, 50);
+         *          Instantiate(spawnPrefab, spawnPosition, Quaternion.identity);
+         * 
+         *      }
+         * 
+         * }
+         *
+         * ------------------------------------------------------------------------------------------------------------------------------------------------
+         * Neden fullGroundTransform? Dogrudan transform.position alirsam collision in 50 birim otesine spawn eder.
+         * Ancak fullGroundTransform un position'ini alirsam fullGround un basladigi yerin 50 birim otesine ekler.
+         * Collision kubunun adini Spawner olarak degistirdim ve Groundspawner scriptini buraya attim.
+         * Spawn Prefab'ine FullGround u surukleyip biraktik.
+         * Son olarak Ground Spawner componentinin Inspectordaki Full Ground Transform fieldina Full Ground u surukleyip birakiyorum.
+         */
+    }
+}

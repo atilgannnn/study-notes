@@ -1,0 +1,19 @@
+    /*
+     * Mixamo veya AssetStore'dan indirdigimiz karakterlerin texturelari, karakter sahne suruklenip birakildiginda gelmiyordu.
+     * Bunun ile ilgili tek tek texture dosyalarina baktik ve materiallar ile eslestirdik.
+     * Bunun icin denedigimiz yontemler soyle :
+     * Edit > Rendering'i kontrol ettik ama hocanin aradigi secenek (Automatic Converter) burada yoktu. Bu sebeple elle ayarladik.
+     * Sahneye atmak isedigimiz Arcade Free Racing Car dosyasinin icindeki "Materials" klasorune gittik.
+     * Oradaki pembe ile gosterilen materialleri sectik. Daha sonra Inspector panelinden Shader > Universal Render Pipeline (URP) > Lit sectik.
+     * Materials kalsoru icinde bir kalsor daha vardi. Onun icine de girdik ve pembe ile gosterilen materyallerin tumunu sectik. Daha sonra Inspector panelinden Shader > Universal Render Pipeline (URP) > Lit sectik yine.
+     * Bu lit secilen materyallerin texture lari var. Lit secince hepsi texture olmadan gri bir renkte geldiler. Simdi de texture lari dogru material a atamamiz gerekti.
+     * Bunun icin materialleri tek tek sectik. Her birini ayri ayri tiklayip Base Map kismindaki yuvarlaga tiklayarak ayuni ismi tasiyan texture i ayni isimli materyale verdik.
+     * Daha sonra Prefab'ler icerisinden istedigimiz arabayi sahneye surukledik. Sonra bu prefab'e hierarchy den bulup, sag tiklayip Prefab > Unpack All (veya sadece Unpack) yaparsak sorunu cozmus oluruz.
+     * Burada yasadigimiz sikinti URP Pipeline sikintisiydi.Bu yontem bunu cozmek icin kullanildi.
+     * Bu tip sorunlar yasaninca, yani indirilen character texture i ve render i gelmeyince genelde 2 secenekten biri olur :
+     * 1) Ya Shader patlaktir    2) Ya da Pipeline'a uygun degil
+     
+     
+     
+     * Burada ekstra bilgi : Uzerlerine ozel kiyafet giyip kafalarina hareket olcen sensorlu kamera takip gercek aktorlerle cekilen goruntulere "Mocap" deniliyormus. 
+     */

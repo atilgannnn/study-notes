@@ -1,0 +1,106 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Array : MonoBehaviour
+{
+    // Global Degiskenler = Icinde bulundugu sinifin butun fonksiyonlari tarafindan ortak bir sekilde kullanilabilir.
+    [SerializeField] private GameObject[] roads;
+    [SerializeField] private float duration;
+    [SerializeField] private Light pointLight;
+    [SerializeField] private MeshRenderer meshRenderer;
+    
+    private int _index = 0; // Bu Global Degisken olmak zorunda cunku Update icinde local degisken olursa her frame 0 a setlenecek ve artmayacak!
+    private bool _canMove = true;
+    private void Update()
+    {
+        if (_canMove)
+        {
+            Vector3 targetPosition = roads[_index].transform.position;
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 10);
+
+            Quaternion lookRot = Quaternion.LookRotation(targetPosition - transform.position);
+        
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRot, Time.deltaTime * 250);
+        
+            float distance = Vector3.Distance(transform.position, targetPosition);
+
+            if (distance < 0.1f)
+            {
+                if (_index < roads.Length - 1)
+                {
+                    StartCoroutine(StopCar());
+                }
+                else 
+                {
+                    _canMove = false;
+                }
+            }
+        }
+        
+    }
+
+    private IEnumerator StopCar()
+    {
+        _canMove = false;
+        UpdateCarCondition(true);
+        yield return new WaitForSeconds(duration);
+        UpdateCarCondition(false);
+        _index++;
+        _canMove = true;
+    }
+
+    private void UpdateCarCondition(bool isCarStopped)
+    {
+        if (isCarStopped)
+        {
+            pointLight.color = Color.red;
+            meshRenderer.material.color = Color.red;
+        }
+        else
+        {
+            pointLight.color = Color.green;
+            meshRenderer.material.color = Color.green;
+        }
+    }
+
+    private void Start()
+    {
+        // Local Degisken = Tanimlandigi fonksiyonun icerisinde kullanilabilir.
+        float localFloat = -1;
+        
+        localFloat = transform.localPosition.x;
+    }
+    
+    /*
+     * Yukaridaki ornekte dizileri kullanarak bir kapsulu yerdeki sphere lari takip edip tek tek ziyaret edecek bir position ve rotation kodu yazdik.
+     * Advance level da bu gelistirmeyi 'Spline' denilen bir yapiyla yapiyorlar. (GTA da mesela oyle)
+     */
+    
+    /*
+     * Derste animasyonlari indirmek icin 'Mixamo' isimli siteyi kullandik. Adobe un sitesi.
+     * Once characters kismindan bir karakter secip indirdik. Genelde characterler T-pose veya A-pose olarak indiriliyor.
+     * Ardindan gerekli animasyonlar animations kismindan indiriliyor.
+     * Burada character ve animation indirirken format FBX for Unity secildi.(Cunku Unity icin indiriyoruz)
+     * Karakteri indirdikten sonra animation indirilirken Skin kisminda without skin seciyoruz cunku with skin dersek butun geometrik yapisiyla vs indirir.
+     * Biz zaten geometrik yapi icerigini character i indirdigimiz icin almis olduk.
+     * Burada cok onemli bir husus daha var :
+     * Character animasyonu ile indirme penceresine geldigimzde yanda character in X noktasindan Y noktasina hareket ettigini goruyoruz.
+     * Animasyon position degistiriyor yani ve biz bir de bunun uzerine C# da transform.position verecegiz.
+     * Bu da karakterin surekli basa sararak sekmesine sebep olacak. Bunu istemiyoruz.
+     * Peki bu durumda ne yapacagiz?
+     * Sagdaki indirme panelinde 'In Place' secenegini tikleyerek indirirsek eger bu sorun ortadan kalkacaktir.
+     * Boylece animasyon character e durdugu yerde eklenecek ve transform.position da bizim tarafimizdan C# da verilecek.
+     */
+    
+    /*
+     * Character imizi T-pose seklinde indirdik. Ardindan Idle, Walk, Jump, Right Walk, Left Walk ve Death animasyonlarini indirdik.
+     * Models klasorunun icinde bir tane Character isimli bir dosya actik. Dosyanin icine T-pose karakterimizi attik. Karakter geldi ama bembeyaz.
+     * Bunun olmasinin sebebi baska bir yerden aldigimiz karakterin goruntusunun tam render edilmemesi.
+     * Bu sebeple T-pose karaktere 2 kere tikladik. sagda acilan Inspector panelinde Location kismini Use External Materials(Legacy) yaptik.
+     * Sonra alttaki Apply butonuna tikladik.
+     * T-pose characterimin oldugu Models dosyasina Materials isimli bir dosya geldi. Design renderlarim hazir.
+     * Sahneden T-pose characterimi siliyorum ve yeniden sahneye ekliyorum. Karakterim duzgun bir sekilde geldi.
+     */
+}

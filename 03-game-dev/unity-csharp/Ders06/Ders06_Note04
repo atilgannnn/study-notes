@@ -1,0 +1,40 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Array : MonoBehaviour
+{
+    // Global Degiskenler = Icinde bulundugu sinifin butun fonksiyonlari tarafindan ortak bir sekilde kullanilabilir.
+    [SerializeField] private GameObject[] roads;
+    private Vector3 _targetPosition;
+    private int _index = 0;
+    private float _distance;
+
+
+    private void Update()
+    {
+        _targetPosition = roads[_index].transform.position;
+        transform.position = Vector3.MoveTowards(transform.position, _targetPosition, Time.deltaTime * 10f);
+        // transform.LookAt(_targetPosition);
+        
+        
+        
+        _distance = Vector3.Distance(transform.position, _targetPosition);
+
+        if (_distance < 0.1f)
+        {
+            if (_index < roads.Length - 1)
+            {
+                _index++;
+            }
+        }
+    }
+
+    private void Start()
+    {
+        // Local Degisken = Tanimlandigi fonksiyonun icerisinde kullanilabilir.
+        float localFloat = -1;
+        
+        localFloat = transform.localPosition.x;
+    }
+}

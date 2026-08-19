@@ -1,0 +1,118 @@
+using System;
+using UnityEngine;
+
+public class Character : MonoBehaviour
+{
+    // Bu etiket degisken private iken Unity editor de set edilebilir hale getirir.
+    // Prvate degiskenler '_'ifadesiyle baslar. Ancak bu etiketi alanlarda gerek yoktur.
+    [SerializeField] 
+    private float moveSpeed;
+    
+    private Rigidbody rigidBody;
+
+    [SerializeField] 
+    private GameObject door;
+
+    private void Start()
+    {
+        rigidBody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        
+        rigidBody.linearVelocity = new Vector3(0, 0, 1);
+
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Door")
+        {
+            other.GetComponent<Door>().OpenDoor();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Door")
+        {
+            other.GetComponent<Door>().CloseDoor();
+        }
+    }
+
+
+    // character in kapiya dogru hareket etmesi icin bunu yapiyoruz
+    // transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+        
+    // Characterín localScale de uc yonden de buyumesi icin kullandik ornek olarak
+    // transform.localScale += Vector3.one * moveSpeed * Time.deltaTime;
+        
+    // Vector3.one = New Vector3(1,1,1)
+    // Vector3.one * 3(veya moveSpeed degeri her ne ise) = New Vector3(3,3,3,)
+    // Vector3.zero = New Vector3 (0,0,0)
+        
+    // Vector3.forward = new Vector3(0,0,1)
+    // Vector3.up = new Vector3(0,1,0)
+    // Vector3.right = new Vector3(1,0,0)
+    
+    // transform.rotation = Quaternion.LookRotation(gittigimiz konum - bulundugumuz konum);
+    // transform.LookAt(gittigimiz konum); => burada direkt gittigimiz transformu vermemiz yeterli
+    
+    
+    // rigidBody yi bir nesneye ekledigimizde ve nesneyi yukaridan biraktigimizda (0, -9.81, 0) olarak bir dusus gerceklestirir.
+    // Y ekseninde default olarak -9.81 dusus olmasinin sebebi bu rakamin gercek yercekimi ivmesi olmasindandir.
+    // rigidBody de 2 adet Velocity (ivme) mevcut. Linear ve Angular.
+    // Linear Velocity => Dikey Ivme(Dusus/Cikis) || Angular Velocity => Yatay Ivme(Donme Hareketi/Pervane)
+    // rigidBody.linearVelocity = new Vector3(0, 0, 1);
+                    
+    // Eger ki Characterín surtunmesini kapatmak ve takla atmasini engellemek istiyorsak, Unity de rigidBody ye gideriz.
+    // rigidBody'de Freeze rotation daki tum yonleri tikleriz ve surtunme kapanir
+    
+    
+    
+    /*
+      // OnCollisionEnter, OnCollisionStay ve OnCollisionExit birbiriyle carpisan ve Is Triggered olmayan nesneler icin gecerlidir.
+          
+          private void OnCollisionEnter(Collision collision)
+          {
+              // Bu fonsiyon carpisma islemi gerceklestiginde 1 kere calisir.
+              // Debug.Log("Collision Enter!");
+          }
+
+          private void OnCollisionStay(Collision collision)
+          {
+              // Bu fonsiyon carpisma islemi gerceklesmeye devam ettigi her frame update gibi calisir.
+              // Debug.Log("Collision Stay!");
+          }
+          
+          private void OnCollisionExit(Collision collision)
+          {
+              // Bu fonsiyon carpisma islemi bittiginde 1 kere calisir.
+          }
+
+          // OnTriggerEnter, OnTriggerStay ve OnTriggerExit birbiriyle carpismayan ve Is Triggered olan nesneler icin gecerlidir.
+
+          private void OnTriggerEnter(Collider other)
+          {
+              // Bu fonsiyon tetikleme islemi gerceklestiginde 1 kere calisir.
+              // Debug.Log("Trigger Enter!");
+          }
+
+          private void OnTriggerStay(Collider other)
+          {
+              // Bu fonsiyon tetikleme islemi gerceklesmeye devam ettigi her frame update gibi calisir.
+              // Debug.Log("Trigger Stay!");
+          }
+
+          private void OnTriggerExit(Collider other)
+          {
+              // Bu fonsiyon tetikleme islemi bittiginde 1 kere calisir.
+          }
+
+     */
+}

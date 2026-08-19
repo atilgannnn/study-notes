@@ -1,0 +1,90 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private GameObject cameraPivot;
+    
+    
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.W))
+        {
+            _forwardValue = 1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            _forwardValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.S))
+        {
+            _forwardValue = -1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            _forwardValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.D))
+        {
+            _rightValue = 1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            _rightValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.A))
+        {
+            _rightValue = -1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            _rightValue = 0;   
+        }
+        
+        // Input sinifindaki mousePositionDelta bize mouse hareketlerini karaktere uygulamaizi saglar.
+        _deltaMousePos = Input.mousePositionDelta;
+        
+        /*
+         * Eski usulde biz W-S-A-D degerlerini ayri ayri _forwardValue ve _rightValue seklinde aldik.
+         * Ardindan asagidaki kodda soyle bir hesaplama yaptik :
+         * Tuslara basinca on ve sag vektor degerleri gelecegi icin bu kodla tam yonlendirme yapiliyor.
+         * Mesela burada sadece D ye basarsak D'nin _rightValue su 1 gelecek ama W ya basmadigimiz icin _forwardValue 0 olacak.
+         * Asagidaki kodda da bunun yansimasi :
+         * _moveDirection = 0 + 1 olacak yani 1 birim saga gidecek.
+         */
+        _moveDirection = (transform.forward * _forwardValue) + (transform.right * _rightValue);
+        
+        _rigidbody.linearVelocity = _moveDirection * moveSpeed;
+        
+        // Bu kisimda neden eulerAngles olarak aldik anlamadim. Hocaya sor!
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x,transform.rotation.eulerAngles.y + (_deltaMousePos.x * mouseSensitivity), transform.rotation.eulerAngles.z);
+        transform.rotation = targetRotation;
+        
+        Quaternion targetCameraRotation = Quaternion.Euler(cameraPivot.transform.eulerAngles.x + _deltaMousePos.y, cameraPivot.transform.eulerAngles.y, cameraPivot.transform.eulerAngles.z);
+        //Mouse rotasyonunu iki deger arasinda sikistirmak icin asagidaki satiri yazdik (-35, 50 arasinda sikistirdik)
+        targetCameraRotation.x = Mathf.Clamp(targetCameraRotation.eulerAngles.x, -35, 50);
+        cameraPivot.transform.rotation = targetCameraRotation;
+    }
+}
+ 

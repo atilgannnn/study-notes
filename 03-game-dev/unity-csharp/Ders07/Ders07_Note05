@@ -1,0 +1,42 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private GameObject cameraPivot;
+    
+    
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+       // Guncel olarak yonleri bu sekilde atiyoruz. 
+       float moveHorizontal = Input.GetAxis("Horizontal");
+       float moveVertical = Input.GetAxis("Vertical");
+       
+       _moveDirection = transform.forward * moveVertical + transform.right * moveHorizontal;
+       _rigidbody.linearVelocity = _moveDirection * moveSpeed;
+       
+        _deltaMousePos = Input.mousePositionDelta;
+        // Bu kisimda neden eulerAngles olarak aldik anlamadim. Hocaya sor!
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x,transform.rotation.eulerAngles.y + (_deltaMousePos.x * mouseSensitivity), transform.rotation.eulerAngles.z);
+        transform.rotation = targetRotation;
+        
+        Quaternion targetCameraRotation = Quaternion.Euler(cameraPivot.transform.eulerAngles.x + _deltaMousePos.y, cameraPivot.transform.eulerAngles.y, cameraPivot.transform.eulerAngles.z);
+        //Mouse rotasyonunu iki deger arasinda sikistirmak icin asagidaki satiri yazdik (-35, 50 arasinda sikistirdik)
+        cameraPivot.transform.rotation = targetCameraRotation;
+    }
+}
+ 

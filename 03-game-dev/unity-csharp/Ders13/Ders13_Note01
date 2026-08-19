@@ -1,0 +1,82 @@
+namespace Ders13
+{
+    public class ProjectNotes13
+    {
+        /*
+         * Bu derste ilk once RayCasting (isin gonderme) yontemini ogrenecegiz.
+         * Bu yontem nedir?
+         * Bu yonteme gore karakterimiz bir kapiya veya bir objeye yaklasirken isin gonderir ve bu isina gore kapi acilir veya kapanir.
+         * Peki isin yontemi veya trigger/collision yontemi hangisi daha iyi?
+         * Eger bir shooter oyunu yapiyorsaniz ve bunu trigger/collision ile yapiyorsaniz dusman karaktere ates edince onun collision veya trigger alanina girmesi lazim.
+         * Bu da yoktan yere bir phase eklememiz gerekiyor demek.
+         * Bunun yerine isin gonderirsem salisesinde dusmana ulasiyor, zaman kaybi yok.
+         * Ote yandan araba carpismasi gibi bir durumda bir karaktere carpinca isin kullanmak mantiksiz. Collision mantikli.
+         * Oyunlarda mesela loot yapiyorsunuz. Bu lootlari toplama da isinla yapilan bir islem.
+         * Loot toplamayi collision ile yapsak collision alanina girince loot a bakmadan da loot toplayabilirsin ama bu oyunlarda istenmeyen bir sey.
+         
+         * Bir sahne olusturduk. Astra ve bir tane de onceden hazirladigimiz kapi Prefab'i sahnede yer aliyor.
+         * Astra kapiya yaklasinca kapiyi Raycast ile acacagiz. Bunun icin Astra icerisinde SenRaycast isimli bir fonksiyon olusturduk.
+         * Bu fonksiyonun icinde Physics.Raycast fonksiyonunu cagirdik.
+         * RaycastHit hit; degiskeni create ettik icerisinde.
+         * Physics.Raycast(transform.position, transform.forward, out hit, 500); degerlerini aliyor. Bu ne demek?
+         * Physics.Raycast(Bulunan konum, gittigi yon, carpacagi nesne bilgisi, isin uzunlugu);
+         * Neden hit degil sadece de out hit?
+         * Cunku degeri disaridan dinamik olarak alip iceriye setleyecek.
+         
+         * Debug yaparken Debug.DrawRay(transform.position, transform.forward * 500, Color.red, 1f); dedik.
+         * Bunun anlami Debug.DrawRay(Bulunan konum, gittigi yon * uzunluk, isin rengi, sahnede gorunme suresi);
+         * Cikti Game view da gorunmuyor, Scene de gorunuyor.
+         * Astra13 de rayStartTransform adinda bir Game Object degiskeni olusturdum.
+         * Astra icerisinde bos bir game object olusturup, kirmizi bir diamond seklinde gizmo verdim
+         * Bunu Astra'nin karin hizasina getirdim.
+         * Ardindan olusturdugum bu bos objeyi rayStartTransform degiskenimin icine surukleyip biraktim.
+         * Artik isini karnindan veriyor.
+         * Burada daha sonra rayStartTranform'a MainCamera'yi verdik. Boylece baktigi yone dogru isin verecek.(Best Practice)
+         
+         * Bu noktada OOP conceptlerine giris yapiyoruz ve ilk olarak "Event" kavramini ogreniyoruz.
+         * Dusunun ki characterimiz bir odaya giriyor odada tavanda bir isik var bir tane portal var ve bir acik kapi var.
+         * Ayni zamanda da acik kapinin biraz onunde yerde bir buton var.
+         * Karakter butona adim atip bastiginda kapi kapaniyor, isik sonuyor ve portaldan canavarlar geliyor ve odaya sis doluyor.
+         * Iste tek hamleyle birden fazla eylemin aktif hale gelmesi eventler ile mumkundur.
+         * Event olmadan bunu yapmaya calissaydik sahnedeki her nesneyi tek tek bulup triggerlamamiz gerekirdi ve bu cok uzun zaman alirdi.
+         * Tipki bir komutanin her bir askere tek tek gidip emir vermesi gibi. Eventlerle biz bir tabura tek seferde emir veriyoruz.
+         
+         * Derste once sahnede bulunan kapiya ek olarak kup olusturup ustune isik koyduk.
+         * Ardindan da yere bir silindir olusturduk ve silindire GroundButton dedik.
+         * Amac su : Astra butona cikinca kapi acilacak ve isik yanacak butondan inince de kapi kapanacak ve isik sonecek.
+         * Bunu manuel olarak denedikten sonra "Event" ile ayni seyi yaptik.
+         * Event'ler aslinda Delegelerdir(Delegates)
+         * Event olustururken access type + Action + degisken adi seklinde olusturuyoruz. (public Action OnButtonPerformed gibi)
+         * Event'ler tipki TypeScript veya Python'da oldugu gibi parametre degisken turu alabilirler.
+         * Mesela public Action<bool> OnButtonPerformed; da boolean parametre almasini istedik.
+         
+         * public delegate void OnButtonPressed(bool param) seklinde bir delegate de olusturabilirdik ama bu konuya cok girmiyoruz.
+         * Event ve Delegate arasindaki tek fark su :
+         * --> Event'ler Action alir ve bir sinif icinde tanimlanir.
+         * --> Delegate'ler delegate alir ve sinif disinda tanimlanir.
+         
+         * Bu dersin son konusu "Interface" kavramiydi.
+         * Bu kavrama gecmeden once soyle bir seyden bahsettik. Event ile tek seferde bircok seyi es zamanli trigger etme olayini gorduk.
+         * Ama mesela Raycast ile ben 'E' tusuna basinca kapida raycast atinca kapi acilacak ama isiga raycast atinca isik yanacak.
+         * Bunlarin her biri icin raycast in farkli calismasini saglamak ozellikle kompleks ve buyuk projelerde cok sikintili.
+         * Bunun yerine hoca 'Etkilesim' olusturmak ve carptigimiz (raycast) attigimiz seyin icine onceden yerlestirdigimiz etkilesim fonksiyonlarini calistirmaktan bahsediyor.
+         * Boylelikle bunu tek satir kodla halletmis oluyoruz.
+         
+         * Interface'ler icerisine fonksiyon yazabildigimiz yapilardir.
+         * Biz de bunu interface icerisinde fonksiyon olusturarak bu yukarida bahsettigimiz etkiyi saglayacagiz.
+         * Interface adinda bir folder olusturduk icine de IEtkilesim adinda bir Script ekledik.
+         * C# da Interface isimleri 'I' harfiyle baslar.
+         * Script'te MonoBehaviour ve iki noktayi sildik. Public class ifadesini de public interface olarak degistirdik.
+         * Peki Interface'i bir class a nasil ekleyecegim?
+         * Ornegin MyLight scriptine gittik. Public class MyLight: MonoBehaviour ifadesinin sonuna virgul koyup IEtkilesim yazdik.
+         * Class adinin alti kirmizi cizgi oldu neden? Cunku interface icerisindeki methodlari/fonksiyonlari override etmemizi istiyor.
+         * Override etmek icinde MyLight classinin sonuna gidip public void OnEtkiles() {} yazmamiz yeterli oldu. Kirmizilik gitti.
+         
+         * Bu duzenlemeleri yaptiktan sonra asagidaki gibi bir kodu Astra icerisinde yazdik
+         * if (hit.transform.GetComponent<IEtkilesim>() != null)
+           {
+               hit.transform.GetComponent<IEtkilesim>().OnEtkiles();
+           }
+         */
+    }
+}

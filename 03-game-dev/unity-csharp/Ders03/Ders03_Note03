@@ -1,0 +1,58 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float forwardSpeed = 5;
+
+    public float upSpeed = 5;
+
+    public float rightSpeed = 5;
+    
+    
+    
+    void Start()
+    {
+    }
+
+    void Update()
+    {
+       
+        // Vector tanimlamasi "new Vector3(x,y,z)" tanimlanir.
+        // transform.position += new Vector3(0, 0, forwardSpeed * Time.deltaTime);
+
+        transform.rotation *= Quaternion.Euler(0, 10 * Time.deltaTime, 0);
+
+    }
+    
+    /*
+     * Vector3.forward * hiz ile new Vector3 (0, 0, hiz) ayni seydir.
+     * Vector3.forward => (0, 0, 1)
+     * Vector3.up => (0, 1, 0)
+     * Vector3.right => (1, 0, 0)
+     */
+    
+    /*
+     * Eger ki ben sahnedeki nesnemin kendi etrafinda donmesini istiyorsam bu sefer rotation kullanmam gerekir.
+     * transform.rotation da rotation Quaternion turunde bir obje dondurdugu icin Quaternion bir degisken yaratmam gerekir.
+     * Yalniz bunu asagidaki gibi yapamiyorum. Sebebi ise rotasyon islemi toplama degil carpma temellidir ve carpmamiz gerekir.
+     * transform.rotation += Quaternion.Euler(0, 10, 0); YANLIS!
+     * transform.rotation *= Quaternion.Euler(0, 10, 0); DOGRU!
+     
+     * Burada peki y ekseninde sahnemdeki kup donuyor ama neye gore donuyor? Tabiki kendi lokaline gore donuyor.
+     * Eger ben bunu globale gore dondurmek isteseydim ne yapacaktim? O halde soyle yazacaktim :
+     * transform.rotation = Quaternion.euler(0, 10.Time.deltaTime, 0) * transform.rotation;
+     
+     * Yani transform.rotation basta olursa lokale gore, sonda olursa globale gore sahnemdeki nesne doner.
+     
+     * Neyse ki bunlari ezberlemek zorunda degiliz cunku bunun icin hazir fonksiyonlar var.
+     * transform.Translate() bunlardan biri.
+
+     * transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime, Space.World); (Rotasyona gore hareket ettirme)
+     * Sondaki virgulden sonraki kisimda Space.Self dersem Locale gore, Space.World dersem Globale gore hareket eder.
+     
+     * transform.Rotate(Vector3.up * 10 * Time.deltatime, Space.Self); (Rotasyona gore dondurme)
+     * Sondaki virgulden sonraki kisimda Space.Self dersem Locale gore, Space.World dersem Globale gore doner.
+     */
+    
+}

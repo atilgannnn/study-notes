@@ -1,0 +1,21 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float rotateSpeed;
+
+    void Update()
+    {
+        // Asagidaki kodu yazdiktan sonra bu dosyayi DirectionalLight'a component olarak atadik ve gece gunduz dongusu yarattik.
+        transform.Rotate(Vector3.forward * rotateSpeed * Time.deltaTime, Space.World);
+
+    }
+    
+    /*
+     * Unity de 2 tane sphere yarattik ve birini Sun digerini Earth yaptik. Ancak Earth, Sun in etrafinda donmuyor. Dondurmek icin ne yapariz?
+     * Bunun cevabi cok basit. Bir tane Create Empty Object yaratiriz. Ardindan bu object e Gizmo veririz ve adini EarthParent koyariz. 
+     * EarthParent in konumunu Local ve Pivot olarak ayarlariz ve bu parent i Sun'in icine yerlestiririz. Bu sayede Sun Earth'un etrafinda donuyormus gibi bir goruntu olustururuz.
+     */
+
+}

@@ -1,0 +1,119 @@
+namespace DersNotlari.Ders26
+{
+    public class Ders26Notes
+    {
+        // % Bu derste 2D Projemizi tamamladik ve oyunumuzu nasil cikti aldigimizi ogrendik.
+        
+        /*
+         * Sahnemizde ziplama, ates etme ve enemy hareketleri gibi bir takim ozellikleri ekledik.
+         * Karakterimiz ziplarken bir titreme goruyorduk ama bunu Main Camera'daki Update Method u Fixed Update yaparak cozduk.
+         * Enemy ye carptigimizda enemy bizi geriye itiyordu. Bunun hizini biraz daha arttirdik.
+         * Sahne tasarimimiz ile ilgili bazi degisiklikler yaptik. Mesela platformdaki tum groundlari tek bir empty object icine atadik.
+         * Sonra bu platformu scale ettik ve dahah kucuk hale getirdik.
+         * Bunu yaporken Snapping i actik ve oradan ayarladik ki mouse hareketimize gore es oranlarda duzenleme saglansin.
+         */
+        
+        // # Karakter ziplarken platformun bir kosesinde havada asili kaldi.
+        // # Bunun sebebi surtunme ve karakterin polygon collider a sahip olmasi.
+        // # Bunu cozmek icin Physic Material 2D olusturuyoruz ve ayrica polygon collider i circle collider ile degistiriyoruz.
+        // # Physic Material 2D icerisinde Friction ve bounciness degerlerini 0 a cekip Friction combine ve bounce combine i minimum yapiyoruz ve karakterimizin collisionina material i olarak bu dosyayi veriyoruz.
+        
+        // # Toplyacagimiz altin icin assetimizden bir coin seciyoruz ve animasyonunu main character de yaptigimiz gibi slice yapip olusturuyoruz.
+        // # Coinimizi prefab yapip box collider ekliyoruz ve is Trigger ini aciyoruz.
+        // # Coin adinda ayri bir script acip bu scripti coin prefab e veriyoruz.
+        // # Coin scripti icerisinde OnTriggerEnter2D fonks olusturup coine carpan seyin main character olup olmadigini if ile kontrol ediyoruz.
+        // # Hierarside sag tiklayip Effects > Particle System secip adini CoinParticle diyoruz.
+        // # Bunu prefab yapiyoruz. Particle effect duman, kivilcim veya altin toplamada verilen efektlerdir.
+        
+        // @ CoinParticle in Inspectorunde bazi menuler var anlamlari su :
+        // --> Duration : Particle calisma suresi
+        // --> Looping : surekli particle efekti tekrar eder
+        // --> Prewarm : Yavastan hizliya cikis ayaridir. Yavastan hizliya degil birden cikis yapar.
+        // --> Start Delay : Particle basinda gecikme suresi
+        // --> Start Speed : Baslangic hizi
+        
+        // % Butun bu seceneklerde oklarla acilan yerlerde Random Between gibi secenekler var.
+        // % Bunun anlami verilen iki degerden birini secebiliyoruz anlamina geliyor.
+        
+        // --> Gravity Modifier : Particle lara yer cekimi verir. Bu deger eklenirse yercekimi verilmis olur. Sus havuzu ve selalelerde kullanilir.
+        // --> Shape : Particle'in nasil bir sekil uzerinden spawn olacagini ayarlar.
+        // --> Emission : Particle spawn degerleri ve sayisini belirledigimiz yer.
+        // --> Bursts : Particlelarin pat diye hemen spawn olmasini saglar.
+        // --> Velocity Over Lifetime : Iki deger arasindaki particle ivmelenme omrunu gosterir.
+        // --> Color Over Lifetime : 2 renk seceriz ve particle in omru boyunca bu iki renk arasinda degisecegini gosterir.
+        
+        // # Particle'imiza material vermek icin once Materials klasoru icerisinde M_CoinParticle adinda bir material olusturuyoruz.
+        // # Ardindan bunun shader ayarini Universal Render Pipeline > Particles > Unlit yapiyoruz.
+        // # buna verecegimiz texture icin coin asset dosyamizdan coin image cekiyoruz.
+        // # Bu arkadasi M_CoinParticle materialinin Base map i yapiyoruz.
+        // # Ama particle gelirken coin etrafi dolu turuncu bir kutu icerisinde geldi.
+        // # Bunu cozmek icin M_CoinParticle in Surface Type'ini Transparent yapiyoruz ve duzeliyor.
+        // # CoinParticle prefabindeki Rotation Over Lifetime kismindan z degerini 45 e setliyoruz ki particle lar donerek dagilsin.
+        // # Ayrica Start Rotation degerini Random between two constants setleyerek ilk degeri 0 ikinci degeri 45 giriyoruz.
+        // # Boyle yapinca baslangicta da her bir particle farkli bir rotation da baslayacaklar.
+        // # CoinParticle prefabini Coin prefab icerisine atiyoruz.
+        // # CoinParticle in Play On Awake'ini de kapatiyoruz. Yangin, ates veya duman gibi seylerde bunu acik birakiriz.
+        
+        // $ Coin icerisine gelip [SerializeField] private ParticleSystem particle; degiskeni olusturuyoruz.
+        // $ Bunu OnCollisionenter2D icerisindeki if icerisinde Destroy(gameObject) den once particle.Play() ile cagiriyoruz.
+        // $ Coin prefab icerisindeki Coin scriptindeki bu yeni Particle fieldina CoinParticle prefabini surukleyip birakiyoruz.
+        // $ Particle hala oynamadi. NEDEN?
+        // $ Cunku particle oynadiktan sonra coin i destroy ediyoruz cunku hala particle coin in child i.
+        // $ Bunu cozmek icin particle.Play(); den sonra Destroy() dan once particle.transform.parent = null; yapiyoruz.
+        // $ Boylece particle coin yok olsada oynuyor cunku artik coin in bir child i degil.
+        
+        // @ Particle'imizin bir de collision olayi var.
+        // @ Particle'larimizin Bounce degerini mesela 0 yaparsak particle'lar ziplamaz.
+        
+        // % Oyunumuzda bazi post processing islemleri yapmak icin 2DGame icerisinde Volumes klasoru acip icerisine Volume Profile olusturuyoruz.
+        // % Hierarside de sag tiklayip Volume > Global Volume olusturuyoruz.
+        // % Volume Profile i Global Volume un Profile i olarak surukleyip ekliyoruz.
+        // % Color Adjustments ekleyip Post Exposure, contrast ekleyip Saturation'i aciyoruz.
+        // % Ardindan Vignette efekti ekleyip oyuna daha fazla odak alani eklemis oluyoruz.
+        // % Ardindan sahnede enemy ve coinleri cogaltip farkli yerlere yerlestiriyoruz.
+        
+        // & Enemy secili iken prefabde bir animasyon dosyasi olusturduk ve adini da AN_EnemyHit verdik.
+        // & Belirli araliklarla darbe aldiginda kirmizi beyaz renkleri arasinda enemy rengi degisecek.
+        // & AC_Enemy isminde otomatik bir Animator Controller olusmus Enemy icin. Burada bu Hit ayarini da Hit adinda bir Trigger parametre ekleyerek sagladik.
+        // & Enemy icin de bir particle yapip bunu Enemy ye veriyoruz ki enemy oldugunde patlasin ve parcaciklari sacilsin.
+        // & Yine bunun da particle.transform.parent = null; setliyoruz.
+        
+        // # Assetstore dan 8 Bit SFX assetleri indirdik ve bunlari oyunumuzda kullandik.
+        // # Burada soundlari verirken tek tek nesnelere vermekten ziyade sahnede bir tane SFX isimli Sound Manager empty object'i olusturduk.
+        // # Ardindan scripts klasorunde SoundManager isimli bir script actik ve icerisine sound Type adinda bir enum ekledik.
+        // # Ayrica SoundManager'i static yaptik. public void PlaySFX(SoundType soundType) isimli bir fonks olusturduk.
+        // # Bu enum icerisinden cektigimiz type lari SoundManager class'i icerisinde olusturdugumuz public void PlaySFX(SoundType soundType) icerisindeki bir switch-case ile kontrol ettik.
+        // # PlaySFX'i MainCharacter'da jumpda, ates etmede, coin toplamada, enemy de hasar almada ve enemy patlamasinda kullandik.
+        // # Sahnemdeki SFX icerisinde her bir ses efekti icin ayri ayri Audio Source'lar actik ve bunlari da SoundManager icerisindeki ilgili isimdeki [SerializeField] degiskenlerinin icerisine surukleyip biraktik.
+        // # Son olarak da indirdigimiz 8 Bit SFX leri ilgili yerlere surukleyip biraktik. Play on awake'leri de kapattik.
+        
+        // $ VP_Game Volume dosyasi icerisinde de bir de Film Grain effect ekledik ki daha retro bir goruntu kazandiralim oyuna.
+        // $ Ayrica Lens Distortion ve Chromatic Aberration ekledik.
+        // $ Vee son olarak oyunun ciktisini alacagiz.
+        // $ Hanig platformlara cikti almak istiyorsak Unity Hubá gelip buradan istedigimiz modulleri (Windows, MacOS, Android, IOS gibi) secebiliyor ve projeye entegre edebiliyoruz.
+        // !! Burada onemli bir nokta var. Moduller icerisinde Playstation veya XBox YOK! NEDEN ?
+        // !! Mesela Playstation'a oyun yapmak istiyorsaniz Playstation ile irtibata gecip onlardan onay almaniz gerekir.
+        // !! Ayrica Playstation eger bunu kabul ederse bize bir development kit gonderiyor ve oradaki kurulumlari yaparak cikti alabiliyoruz.
+        
+        // $ Unity'de Edit > Build Profile seceneklerini tikladigimizda buradan cikti almak istedigimiz platformu seciyoruz.
+        // $ Daha sonra bu platformu sectigimizde Scene List'e sahnemizin pathini veriyoruz. Sahneyi surukleyip buraya birakmamiz yeterli.
+        // $ Platform Settings'de de eger varsa ayarlarimizi yapip Build'e tikliyoruz.
+        // $ unity motoru oyunda kullanilan assetleri oyunda tutar kullanilmayanlari discard eder yani ayiklar.
+        // $ Hoca mesela soyle bir ornek vermisti : Kendilerinin cikarttiklari oyuna assetleri yigmislar. Normalde proje paketi 250 GB boyutundayken cikti aldiklarinda oyun 5G kalmis. (Unreal Engine'de yaptilar ama onlar ama fark yok ikisi de ayni islemi yapiyor)
+        // $ Hoca ama kullanilmayan assetlerin de lokalde tutulmamasi gerektigini soyledi. Proje zor acilir yoksa dedi.
+        // $ Oyunun ciktisini aldigimizda baslangicta Unity logosu ve adi cikiyor. Bu kisimda degisiklikler yapabilir ve kendi logomuzu ve adimizi yazdirabiliriz.
+        // $ Bunun icin Edit > Project Settings > Player kismindan Company Name'i degistirerek kendi bireysel veya company adimizi verebiliriz.
+        // $ Default Icon da oyunu indirince masaustunde oyun dosyasinda gorunen icon.
+        // $ Product Name oyun adi. Sweet Candy Adventure dedik biz.
+        // $ Resolution and Presentation'da oyunun full screen mi pencereli mi olmasi gerektigi ile ilgili ayarlari verdigimiz yer.
+        // $ Splash Image da Unity nin kendi giris sahnesi ile ilgili ayarlamalari yaptigimiz yer. Orada Preview butonu ile onizleme yapabiliyoruz.
+        // $ Bir tane daha icon secenegi var orada. Buraya ekledigimiz icon da Unity yazisindan sonra gosterilebilir eklersek.
+        // $ Show splash Screen in tikini kapatirsak Unity on sahnesi gosterilmez.
+        // $ Other Settings kisminda da Backend de ne kullanacagiz vs gibi teknik ayarlar da bu kisimda.
+        // !! Hoca dedi ki bu Splash Image Unreal Engine'de hazir gelmiyormus ve Unreal Engine kendi motorlarinda gelistirilen her oyun icin splash image i zorunlu tutuyormus.
+        // !! Dahasi Unreal Engine'de Unity'de oldugu gibi hazir bir Splash Image ayari yok ve kendi formatina gore developerlarin kendilerinin bunu ayarlamasini istiyormus.
+        
+        // $ Ayni oyun dosyasini ikinci kez cikti alinca ilk seferden daha hizli oluyor cunku artik dosya icerikleri kaşelenmiş oluyor.
+        
+    }
+}

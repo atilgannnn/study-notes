@@ -1,0 +1,54 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Array : MonoBehaviour
+{
+    // Array'lerde maksimum eleman sayisi bellidir. Belirlenmelidir.
+    private string[] customers = new string[5];
+    private string targetCustomer;
+    
+    List<string> unknownCustomers = new();
+
+    void Start()
+    {
+        // Burada dizinin [] parantez icinde belirtilen indeksine esittirden sonra gelen eleman atanir.
+        customers[0] = "Ersoy";
+        customers[1] = "Ali";
+        customers[2] = "Michael";
+        customers[3] = "Daniel";
+        customers[4] = "Jessica";
+        
+        unknownCustomers.Add("Ersoy"); // Listeye eleman ekleme
+        unknownCustomers.Remove("Ersoy"); // Listeden eleman cikarma/silme
+        
+        /*
+         * Asagidaki ic ice for dongusunde ilk dongu 3 kere calisacak
+         * Her calismada icerideki for dongusune gore Array in tamamini yazdiracak.
+         * Eger ic Array e Debug.Log dan sonraki satira break; verirsek 3 kere ilk Array elemanini yazdiracakti yani 3 kere Ersoy yazdiracakti.
+         */
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < customers.Length; j++)
+            {
+                Debug.Log(customers[j]);
+                // break;
+            }
+        }
+
+        while (customers[0] == "Ersoy")
+        {
+            //..
+        }
+
+    }
+    
+    // Dongu turleri : foreach loop - for loop - while loop - do while loop
+    
+    /*
+     * Peki Array kullandigimizda Array in boyutunu en basta belirtmem gerekiyor. Ancak benim dinamik bir datam varsa
+     *  ve ben bunu onden sinirlandiramayacaksam ne yapmam gerekir?
+     * O halde List dedigimiz bir yapiyi kullanacagiz.
+     * List de tipki Array gibi icerisine farkli objeler aliyor. Bu objelerin sayisini sinirlandirmiyor.
+     */
+    
+}

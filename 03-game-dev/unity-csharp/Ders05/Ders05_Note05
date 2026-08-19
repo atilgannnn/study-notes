@@ -1,0 +1,104 @@
+using System;
+using UnityEngine;
+
+public class Door : MonoBehaviour
+{
+    [SerializeField] private bool isRotatingDoor;
+
+    [SerializeField] private Light doorLight;
+    
+    [SerializeField] private GameObject d1Parent;
+    [SerializeField] private GameObject d2Parent;
+
+    [SerializeField] private Quaternion d1Rot;
+    [SerializeField] private Quaternion d2Rot;
+
+    [SerializeField] private Vector3 d1Pos;
+    [SerializeField] private Vector3 d2Pos;
+
+    [SerializeField] private float d1Speed;
+    [SerializeField] private float d2Speed;
+
+    private bool _isOpening;
+    private Quaternion _d1InitialRotation;
+    private Quaternion _d2InitialRotation;
+    
+    private Vector3 _d1InitialPosition;
+    private Vector3 _d2InitialPosition;
+
+    private void Start()
+    {
+        _d1InitialPosition = d1Parent.transform.localPosition;
+        _d2InitialPosition = d2Parent.transform.localPosition;
+        
+        _d1InitialRotation = d1Parent.transform.localRotation;
+        _d2InitialRotation = d2Parent.transform.localRotation;
+        
+    }
+    
+    private void Update()
+    {
+        if (isRotatingDoor == true)
+        {
+            if (_isOpening == true)
+            {
+                d1Parent.transform.localRotation = Quaternion.RotateTowards(d1Parent.transform.localRotation, d1Rot, d1Speed * 10 * Time.deltaTime);
+                d2Parent.transform.localRotation = Quaternion.RotateTowards(d2Parent.transform.localRotation, d2Rot, d2Speed * 10 * Time.deltaTime);
+            }
+            else
+            {
+                d1Parent.transform.localRotation = Quaternion.RotateTowards(d1Parent.transform.localRotation, _d1InitialRotation, d1Speed * 10 * Time.deltaTime);
+                d2Parent.transform.localRotation = Quaternion.RotateTowards(d2Parent.transform.localRotation, _d2InitialRotation, d2Speed * 10 * Time.deltaTime);    
+            }
+            
+        }
+        else
+        {
+            if (_isOpening == true)
+            {
+                d1Parent.transform.localPosition =
+                    Vector3.MoveTowards(d1Parent.transform.localPosition, d1Pos, d1Speed * Time.deltaTime);
+                d2Parent.transform.localPosition = 
+                    Vector3.MoveTowards(d2Parent.transform.localPosition, d2Pos, d2Speed * Time.deltaTime);
+            }
+            else
+            {
+                d1Parent.transform.localPosition =
+                    Vector3.MoveTowards(d1Parent.transform.localPosition, _d1InitialPosition, d1Speed * Time.deltaTime);
+                d2Parent.transform.localPosition = 
+                    Vector3.MoveTowards(d2Parent.transform.localPosition, _d2InitialPosition, d2Speed * Time.deltaTime);
+            }
+        }
+    }
+    
+    /*
+     * Yukaridaki kodda sahnemde elle bir kapi yaptim. Kapinin iki turlu acilma sekli var. Rotate ile ve slide ile acilma.
+     * Yukaridaki kodda yer alan boolean ile hangi sekilde acilacagini secip ona gore bir if bloguna giriyor ve kapi aciliyor.
+     * Bu kod cok junior level bir yazima sahip. Ancak is goren bir kod. Daha basit yontemlerle yapilabilir ancak henuz biz onu gormedik.
+     * Burada en onemli husus yine localPosition ve localRotation kullanarak parentin localine gore Rotate veya Slide vermemiz.
+     * Hoca dedi ki genelde local e gore yazilir tum bu fonsiyonlar. Bazi durumlarda globale gore yapman gerekebilir ama sik degildir.
+     */
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Character")
+        {
+            _isOpening = true;
+            doorLight.color = Color.greenYellow;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Character")
+        {
+            _isOpening = false;
+            doorLight.color = Color.red;
+        }
+    }
+    
+    /*
+     * Color nasil calisir?
+     * Color da Vector gibi Quaternion gibi RGB bir degere sahiptir.
+     */
+}

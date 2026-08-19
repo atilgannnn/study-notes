@@ -1,0 +1,157 @@
+namespace Ders10
+{
+    public class ProjectNotes10
+    {
+        /*
+         * Bu derste engelleri ve altinlari rastgele spawn edecek bir yapi kuracagiz.
+         * Ayrica Astra space'e basinca sonsuza dek zipliyor ve bunu clamplememiz lazim.
+         * Hocanin dedigine gore character'in ayaklarina bir sphere collider koyup bunun Is Trigger'ini tikledigimizde bu sekilde de yere temas edip etmedigini kontrol edebilir.
+         * Ancak zaten karakterimiz bir capsule collider'a sahip oldugu icin elimizdeki capsule collider'i kullanarak bu ziplama clampini yapacagiz.
+         * AstraController icerisinde bir adet _isGrounded degiskeni koyduk ve 2 tane OnCollision actik.
+         * OnCollisionEnter ve OnCollisionExit fonksiyonlari olusturduk.
+         * Normalde ziplama takibi yaparken ama best practice olarak RayCasting kullanilir dedi hoca.
+         * TODO !! Bir sonraki projeye gecmeden Raycasting'i gorecegiz dedi hoca. Unutma!
+         
+         * OnCollisionEnter'da _isGrounded = true, OnCollisionExit'de isGrounded = false setlendi.
+         * KeyCode.Space icinde bir if actik ve soyle dedik.
+         * ----------------------------------------------------------------------------------------
+         * if(_isGrounded) {
+         *    JumpCharacter();
+         * }
+         * ----------------------------------------------------------------------------------------
+         
+         * Biz surekli spawn yaptigimiz icin ve OnCollisionEnter sadece 1 kez calistigi icin bazen ziplamiyor.
+         * Bunu cozmek icin OnCollisionEnter'i OnCollisionStay ile degistirdik ki her frame calissin.
+         * Engel ve altinlar icin ise soyle bir yol izledik:
+         
+         1 - GroundPiece isimli bir Script olusturduk ve bunu GroundPiece Prefab'ine verdik.
+         2 - Ardindan designimizin mantigini belirledik. Engel veya altin groundpiece uzerinde rastgele bir konumda olusacak yani rastgele bir koordinat sececegiz.
+         3 - Ardindan engel, altin veya hicbir sey rastgele spawn edilecek.
+         4 - Yani hem konum hem de spawn olacak nesne rastgele gelecek.
+         5 - GroundPiece classini actik. Bir start fonksiyonu olusturduk.
+         6 - Ardindan bir tane private void GeneratePosition() ve  private void GenerateItem() fonksiyonlarini olusturduk.
+         7 - GroundPece prefab'i icerisinde 3 tane empty object olusturup bunlara gizmo verdik.(Left, Middle, Right)
+         8 - GroundPiece class'i icerisinde Transform[] turunde positions degiskeni olusturduk.
+         9 - GeneratePosition() icerisinde startIndex ve endIndex alip randomIndex alabilecegim bir degisken olusturduk.
+         10 - randomIndex'i lokal degisken yapmadik global yaptik cunku GenerateItem'da cagirmamiz gerekiyor.
+         11 - GenerateItem icerisinde de randomIndex degerine gore engel veya altin spawn et veya hicbir sey spawn etme dedik. Bunun icin de Instantiate fonksiyonunu kullandik.
+         12 - goldPrefab ve obstaclePrefab i de globalde [SerializeField] olarak cagiriyoruz ve Instantiate icerisinde atamasini yapiyoruz.
+         13 - Daha sonra bunlari GroundPiece icerisinde field olarak gorunce ilgili inputlara gold ve obstacle prefablerini surukleyip birakiyoruz.
+         14 - Cogunlukla bos ve engel geldi oyunda. Bunu daha duzenli hale getirmek icin randomItemIndex icerisindeki Random.Range(0, 10) degerini 0 - 10 arasinda aldik.
+         15 - GenerateItem icerisindeki kosullari da buna gore guncelledik.
+         
+         * AstraController icerisinde bir coroutine yazdik ve adini IncreaseSpeed() verdik. moveSpeed'i 0.5f arttirdik her frame de.
+         * IncreaseSpeed()'i Start() fonksiyonu icerisinde cagirdik.
+         * IncreaseSpeed()'i kendi icerisindeki if dongusunde recursive yaptik yani kendi kendisini cagirdik.
+         
+         * Oyunu oynarken collisionlar degisirken yani OnCollisionStay den OnCollisionExit e gecerken her frame karakter ziplar gibi bir hareket yapiyor.
+         * Sanki bir kasis varmis gibi bu yukselip alcalmasi tamamen collisionlarin calismasiyla alakali bir durum.
+         * Bu ozellikle spawn olan sonsuz yollu oyunlarda karsimiza cikiyor.
+         
+         * TODO !! Collision Detection Yontemleri !!
+         * Astra'da Capsule collider ve Rigidbody var. Biz fizik derslerinde ne dedik?
+         * Rigidbody ve Collider lar birbirleriyle calisan iki onemli bilesendir(component)
+         * --> Rigidbody bize fizik etkisini saglar || Collider bize temas ozelligini saglar <--
+         * Arka planda bu ikisini hesaplayan bazi matematik hesaplari var.
+         * RunnerCharacter'e Inspector'dan bakinca Collision Detection kisminin Discrete oldugunu goruyoruz. Bu ne demek?
+         * Discrete daha az fizik motorunu yorarak Collision Detection hesaplama yontemi. Bunu daha yavas hareketli nesnelerde kullanabilirsiniz.
+         * Red Dead Redeption da Arthur mesela Discrete olabilir.
+         * Genelde hizli ve hareket eden nesnelerde Continuous Dynamic tercih ediyoruz. Continuous da hizli nesnelerde kullanilir tabi ama Dynamic fizik motorunu bi tik daha fazla calistiriyor.
+         * Continuous Speculative Angular Velocity daha fazla kullanir. Eger transform.rotation degil de fizik kullanarak nesneyi sahnede dondurmek istiyorsak Angular Velocity kullanmamiz gerekir.
+         * Mesela Pinball Arcade Game vardir. Tusa basinda 2 kol yukari donerek topu firlatir. bu Angular Velocity ile yapilmak zorundadir. Bu tarz bir oyunda Continuous Speculative kullanilir.
+         
+         * Edit > Project Settings > Physics > Settings > GameObject de bircok fizik ayarini bulabilirsin.
+         * Default Max Angular Speed = 50 olarak girilmis. Eger dondurme hizini arttirmak istiyorsak buradaki hizi arttirmamiz gerekecek.
+         
+         * TODO !! Collision Detection Yontemleri - 2 !!
+         * RunnerCharacter'in Mass(Kutle) ayari da bizim bu kasis sorununa sebep oluyor olabilir. Karakterin kutle degeri 1 su anda ve biz onu 1000 e cikardik ki yere yaptigi kutle agirligi artsin.
+         * Belirli bir hizdan sonra yine ziplama var. Mass arttirmanin ozellikle surtunmeyi arttirmasi beklenir genelde. Cok feci arttirir surtunmeyi.
+         * Automatic Center of Mass tikenmis. Bunu Automaticten Manuel e aliyorum tiki kaldirarak ve Y degerini -100 girdik.
+         * Yine gecislerde benzer bir etki yaratiyor. Peki Mass artisi ne zaman kullaniliyor?
+         * Mesela bir araba yarisi oyunu var ve bir duba var. Eger aracin kutlesi 1 dubanin kutlesi 1000 ise arabayi patlatir bu durum.
+         * Tam tersi bir senaryoda duba havaya firlar. Iste bu noktada gercel dunyadaki fizik kurallarini oyuna yansitma acisindan kullanisli.
+         * Center of Mass neden onemli? Center of Mass (Agirlik Merkezi) carpisma ve yer cekimi gibi durumlar bu agirlik merkezine gore hesaplanir. Mesela ben agirlik merkezini karakterin sagina alirsam, karakter saga dogru egilme/dusme egiliminde olacaktir.
+         * Ozellikle agirlik merkezi araba yarislarinda arabanin altina konulur ki carpisma durumunda duzgun bir hareket olussun.
+         * Interpolate nedir? Bildigimiz yumusak gecis icin kullanilan harekete interpolate denir. Mesela carpismada Interpolate 2 frame arasinda carpisma sonucu hareketi yumusatir.
+         * Bir de Extrapolate var. Burada da carpismada etrafa sacilan parcalari mesela daha yumusak bir sekilde yansitmak adina kullanilir.
+         
+         * TODO !! Collision Detection Yontemleri - 3 !!
+         * Once Runner kalsoru icerisinde PhysicMaterials isminde bir klasor olusturuyoruz.
+         * Ardindan bunun icine girerek sag tiklayip Create > Physics Material seciyoruz. Olusan dosyaya PM_character adini verdik.
+         * Dynamic ve Static Friction lari 0 setliyuoruz. Bounciness (Hoplama/Ziplama) degeri de 0 setliyoruz. Friction combine ve Bounce Combine degerlerini de Minimum'a aliyoruz.
+         * RunnerCharacter'a ger donersek, Capsule Collider componenti icerisinde Material kismina ben PM_Character'i surukleyip birakiyorum.
+         * Boylece Bounciness'i 0 olan ve surtunmeden etkilenmeyen bir karakter olusturduk.
+         * Genelde Physics Material'ler Collider'larin Material'i olarak veriliyormus.
+         * Astra kosarken hala kasis etkisi devam ediyor.
+         
+         * TODO !! Collision Detection Yontemleri - 4 !!
+         * Bizim cevabimiz ama Physics Settings'de.
+         * Physics Settings'de GameObject icerisine bakarsak burada bazi degerler var :
+         * Default Material = Eger ben buraya bir Physics Material surukleyip birakirsam oyundaki tum nesneler PM icerisindeki settings den etkilenir.
+         * Bounce Threshold = Hoplama / Ziplamaya baslayacagi esik.
+         * Default Contact Offset = Iki nesne arasindaki carpismanin su saniyede hesaplamaya baslayin demek.
+         * Default Solver Iterations = Fizik motorunun saniyede su kadar hesaplama yapmasini sagla. Default 6 ama biz 12 ye cikardik. Boylece fizik motorundaki degisimi gozlemledik.
+         * Default Solver Velocity Iterations = Ivme ile ilgili hesaplamalari saniyede su kadar kez yap demek. Default 1 ama biz 4 set ettik.
+         * Enable Enhanced Determinism = Hoca bunu arastiracagim dedi ama temelde soyle. Unity ve UE Defaul olarak Undeterministic yapidadir. Yani islemcideki performansi ozellikle multiplayer oyunlarda cihazdan cihaza degisiklik gosterir.
+         * Deterministic ozelligi acik olunca gelistirilen oyunlarda cihazlar arasi islemci veya diger fiziki farkliliklari hesaplayarak ona gore bir performans verisi saglar.
+         * Solver Iteration'lari eski default haline getiriyorum.
+         * Sorunun kaynagi Contact Offset'teymis. Bunu fark ettik.
+         
+         * TODO !! Profiler Testi Yapmak !!
+         * Eger profiler testi yapmak istiyorsak bunun icin Window > Analysis > Profiler ekranindan bakmamiz gerekiyor.
+         * CPU Usage, Rendering, Memory ve Physics ile ilgili grafilsek degerleri gorebiliyoruz.
+         * Sol kosede Raw Hierarchy kismi var. Mesela CPU da 60 FPS i asan bir yerde bir sey olmus. Peak yasanmis.
+         * Bir frame de 15 FPS e dusmus. arada bu olabilir ama siklikla oluyorsa bir sorun vardir.
+         * Peak e tikladigimizda Raw Hierarchy de PlayerLoop da UpdateScene icerisinde Physics in oyuna %20 lik bir is bindirdigini goruyoruz.
+         
+         * Hocanin Blender'da hazirladigi Asset ve Texture'lari oyunumuza ekledik.
+         * Zemini ve diger assetleri olustururken farkli texture girdileri var. Mesela zemini ele alalim.
+         * Zeminde Base Map icin Base Texture'i surukleyip biraktik.
+         * Normal Map icin de Normal Texture verdik. Verdigimizde bu texture normal map olarak marklanmadigi icin uyari verdi.
+         * Bunu cozmek icin uyarinin altindaki Fix Now secenegine tikliyoruz.
+         * Normal map icin verilen degeri arttirip azaltarak texture gucunu degistirebiliriz.
+         * Occlusion Map icin AO(Ambient Occlusion) texture'ini ekliyoruz.
+         * Metallic Map kismi icin de Roughness Map Texture'ini ekliyoruz. Bu da yuzeye puruzlu goruntusu vermek icin onemli.
+         * Metallic Smoothness'i arttir azalt yaptigimizda parlama ve puruzleri arttirip azaltiyoruz.
+         * Lava da da ayni kisimlar yapilirken ekstra olarak Emission kutusunu tikledik ve Emission Map icin elimizdeki Lava Emissive texture'ini surukledik.
+         * Bu Emission etkisi Billboard gibi led ler gibi etrafa isik sacan nesnelere etki vermek icin kullaniyoruz.
+         * Lava da karanlikta yine isik sacacagi icin emission vermemiz gerekti.
+         * Butun bu asset texturelarinda Tiling degerleri de guzel bir etki yaratmamizi sagliyor. Pattern tekrarlarini buradan ayarliyoruz.
+         
+         * !! TODO ONEMLI NOT !!
+         * Hoca her zaman texture ayarlarinda Directional Light i hareket ettirip kontrol edin dedi.
+         * Oyunda Lava efektini olusturduktan sonra Window > Rendering > Lighting kismina geldik. Burada sahne ile ilgili bir suru secenek mevcut.
+         * Bunlardan biri de FOG(Sis) etkisi. Fog Density ile sis yogunlugu ayarlaniyor. Color ile de rengi ayarlaniyor.
+         * Yerde fog var ama gokyuzunde sis yok. Neden?
+         * Cunku sahnede gokyuzu disinda diger assetlerde Vertex var ama gokyuzunde yok. Bu sebeple gokyuzu sisli gorunmuyor.
+         
+         * Unity Asset Store'da BOXOPHOBIC firmasina ait Free SkyBox'i indirdik.
+         * Assets > BOXOPHOBIC > Skybox Cubemap Extention > Demo icerisinden sectigim SkyBox texture'ini aliyorum.
+         * Window > Rendering > Lighting icerisinde SkyBox Material kismina surukleyip birakiyorum.
+         * SkyBox'in Inspector panelinden bunun degerini de degistirebiliyoruz.
+         * Buradan donme hizi, skybox a fog ekleme gibi islemler yapabiliyoruz.
+         * Su anda Environment Lighting Skybox dan aliniyor. Asagidaki Generate Lighting butonuna basinca sahnede bir ton degisimi yasaniyor.
+         * Bu da Skybox'in etkisindan kaynaklaniyor.
+         * Intensity Multiplier ile de bu etkinin yogunlugunu arttirip azaltabiliyoruz.
+         * Sahneye olan ton etkisini Skybox dan almak istemiyorsak da Environment Lighting altindaki Source kismini 'Color' veya 'Gradient' yapabiliriz.
+         * Environment Reflection'da yansima efekti veriyor.
+         
+         * Oyuna Post Process(Son dokunuslar) eklemek icin Hierarchy de sag tiklayip Volume > Global Volume ekliyoruz.
+         * Daha sonra Runner icerisinde Volume diye bir klasor aciyoruz.
+         * Klasorun icinde sag tiklayip Create > Rendering > Volume Profile olusturuyoruz. Adina VP_runner diyoruz.
+         * Bunu surukleyerek Global Volume e ekliyoruz. Add Override a tiklayip Post Processing > Color Adjustments seciyoruz.
+         * Burada Saturation(Renk Doygunlugunu Siyah Beyaz Yapar), Post Exposure(Parlaklik Etkisi), Contrast(Renk Zitliklari), Color filter(Renk Filtresi), Hue Shift(Renk Degisimi) ayarlari yapabiliyoruz.
+         * Add Override > Post Processing > Bloom ekliyoruz. Threshold ve Intensity ayarlarini setliyoruz.
+         * Add Override > Post Processing > Chromatic Aberration ekliyoruz. Bu efekt bir lens firmasinin bir lensi yanlis uretmesi sonucu ortaya cikmistir.
+         * Intensity degeri ile bu efekti setleyebiliriz.
+         * Add Override > Post Processing > Lens Distortion ekliyoruz.
+         * Lens Distortion lens ile bombeli veya dalgali goruntuler vermeye yarar. Bu efekti tek bi nesneye vermek icin ise shader yazmak gerekir.
+         
+         
+         * Oyunda yaptigimiz bu gorsel ayarlar sahnede oluyor ama game camerada olmuyor. Bunu main cameraya uygulayabilmemiz lazim.
+         * Main Camera'nin Inspector'inda Post-Processing i tikliyoruz ki degisiklikler bu cameraya da yansisin.
+         * Ligthing > Fog icin Linear secebiliriz. Hoca bunu daha cok sevdigini soyledi. bu sayede elle nereden itibaren fog baslasin buna karar verebiliyoruz.
+         */
+        
+    }
+}

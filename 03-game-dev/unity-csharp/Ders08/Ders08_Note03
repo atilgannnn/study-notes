@@ -1,0 +1,94 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private GameObject cameraPivot;
+    [SerializeField] private Animator animator;
+
+
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        
+        
+        // Bunu tanimladiktan sonra animasyon tusa basmayi durdurunca hafif bir kaymaya sebep oldu. Animasyon azicik devam etti.
+        // Bunun cozumu icin de "Input.GetAxis" yerine "Input.GetAxisRaw" kullandik.
+        // Peki neden? GetAxis 0 dan 1 degerine gecerken yumusak bir gecis yapar. Bu da animasyonu oynatmaya devam eder.
+        // GetAxisRaw 0 dan 1 e sert bir gecis yapar. Animasyon aninda durur veya degisir.
+        // Peki ben GetAxis() kullanmak istiyorum ama GetAxisRaw() in verdigi etkiyi elde etmek istiyorum. O halde nasil yapacagim?
+        // Bu durumda GetAxis ile gelen float degerini integer a cevirmemiz gerekir. Bunu da Type Casting ile asagidaki gibi yapacagiz.
+        // animator.SetFloat("ForwardFloat", vertical); ==> BEFORE TYPE CASTING
+        // animator.SetFloat("ForwardFloat", (int)vertical);  ==> AFTER TYPE CASTING
+        
+        // Type Casting yaptigimiz halde dururken aniden duruyor fakat idle dan yurumeye gecerken hemen gecmiyor biraz bekliyor.
+        // Bunu da soyle cozebiliriz : 
+        
+        /*
+        
+        float animationForward = Input.GetAxisRaw("Vertical");
+        float animationRight = Input.GetAxisRaw("Horizontal");
+        
+        animator.SetFloat("Vertical", animationForward);
+        animator.SetFloat("Horizontal", animationRight);
+        
+         */
+        
+        // Blend Tree kullanirken bu yukaridaki tasarima artik gerek yok. GetRawAxis dememiz gerekmiyor yani.
+        // Bunun yerine soyle yapiyoruz : 
+        
+        animator.SetFloat("Vertical", vertical);
+        animator.SetFloat("Horizontal", horizontal);
+        
+        // Animator da eger animasyonlar arasi bagaldigimiz thread'lere bakarsak, Inspector > Settings > Transition duration kisminda 0.25 sn lik yumusak bir gecis duration'i default indirilen animasyonda verildigini goruruz.
+        // Eger bu degeri sifira cekersek ne kadar sert bir gecis oldugunu goruruz. O yuzden animasyon bizim icin bu gecisi korudugu icin buna bagli kalarak devam ediyoruz. 
+        
+        _rigidbody.linearVelocity = (transform.forward * vertical * moveSpeed) + (transform.right * horizontal * moveSpeed);
+
+        _deltaMousePos = Input.mousePositionDelta; 
+       
+        transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + _deltaMousePos.x, transform.rotation.eulerAngles.z);
+        
+        transform.Rotate(Vector3.up * _deltaMousePos.x, Space.World);
+        cameraPivot.transform.Rotate(Vector3.right * _deltaMousePos.y, Space.Self);
+    
+
+
+
+    }
+    
+    /*
+     * Animasyonlarimizi derli toplu bir bicimde tutmak ve birden fazla animasyonu birbirine baglamak icin kullandigimiz bir node yapisi var.
+     * Bu yapiya "Blend Tree" diyoruz.
+     * Blend Tree'ler Animator > Sag Tik > Create State > From New Blend Tree seklinde olusturuluyor.
+     * Adini BasicMovement verdik.
+     * Blend Tree olusturduktan sonra Blend Tree ye tikliyoruz ve bizi BasicMovement'in icine goturuyor.
+     * Blend Tree'nin saginda Inspector panelinde motion kisminda + isaretine basarak "Add Motion Field" diyoruz.
+     * 5 adet motion field ekliyoruz.
+     * Bu field lar Idle, Walk, Walking Backward, Right Strafe ve Left Strafe Animasyonlarini ekledik.
+     * Bizim bu eklenen animasyonlarin animator'e tanitilmasi lazim. Bunun icin sunu yapacagiz :
+     * Biz aslinda 2 eksen kullaniyoruz : Vertical ve Horizontal
+     * Bu sebeple Blend Tree'nin Inspector kisminda Blend Tree'ye 2D bir secim eklememiz gerekiyor.
+     * Biz calismamiz icin Blend Type > 2D Free Form Directional sectik. Baska 2D formalari da var ama biz bunu sectik.
+     * Artik ForwardFloat kullanmiyorum. Burada 2 degiskenim var: Vertical ve Horizontal.
+     * Parameters kisminda da x ekseninde Vertical ve y ekseninde Horizontal kullanacagimi belirtiyorum.
+     * Bu degerleri Motion daki PosX ve PosY den de dusunebiliriz ayni degerler cunku.
+     */
+
+}
+ 

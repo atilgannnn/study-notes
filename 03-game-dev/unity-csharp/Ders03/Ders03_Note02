@@ -1,0 +1,39 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float forwardSpeed = 5;
+
+    public float upSpeed = 5;
+
+    public float rightSpeed = 5;
+    
+    void Start()
+    {
+    }
+
+    void Update()
+    {
+        // Dunyaya (Global) gore
+        transform.position += Vector3.forward * (forwardSpeed * Time.deltaTime) + 
+                              Vector3.right * (rightSpeed * Time.deltaTime) +
+                              Vector3.up * (upSpeed * Time.deltaTime);
+        
+        // Nesneye (Local) gore
+        transform.position += transform.forward * (forwardSpeed * Time.deltaTime) + 
+                              transform.right * (rightSpeed * Time.deltaTime) +
+                              transform.up * (upSpeed * Time.deltaTime);
+
+    }
+    
+    
+    /*
+     * Vector3.forward, Vector3.right, Vector3.up = Dunyanin (Global) koordinat sistemine gore yon belirtir.
+     * transform.position += Vector3.forward * (forwardSpeed * Time.deltaTime);
+       
+     * transform.forward, transform.right, transform.up = Nesnenin (Local) rotasyonuna gore yon belirtir.
+     * transform.position += transform.forward * (forwardSpeed * Time.deltaTime);
+     */
+    
+}

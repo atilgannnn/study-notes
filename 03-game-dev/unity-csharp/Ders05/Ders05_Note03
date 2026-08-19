@@ -1,0 +1,12 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{    
+    /*
+     * Prefab nedir?
+     * Prefab bir asset dir. Tasarlanmis kodu yazilmis bir prefab sahnede farkli yerlerde kullanabilecegimiz bir asset turudur.
+     * Prefab Unity de ayri bir tab de acilip icinde duzenlemeler yapilirsa o prefab in kullanildigi her yerde ayni duzenleme olur.
+     * Prefab lerden birine bir ekleme yapildiginda Inspector'daki Overrides kismindan Apply All a tiklaninca degisiklik tum prefablere uygulanir.
+     * Eger degisiklik yapilan prefab de Inspector'daki Overrides kismina gelip Revert All dersek, degisiklikler geri alinir.
+     */
+}

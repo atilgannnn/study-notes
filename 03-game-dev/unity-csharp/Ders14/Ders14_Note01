@@ -1,0 +1,81 @@
+namespace Ders14.Inheritance
+{
+    public class ProjectNotes14
+    {
+        /*
+         * Bu derste inheritance mantigina devam ettik ve sahnede silahlar olusturduk.
+         * Silah assetlerini assetstore dan hazir aldik. Ardindan silahlar icin gerektiginde parent olusturduk.
+         * Mermileri sphere veya capsule ile create ettik ve her biri icin ayri ayri bulletspawn empty objecti create ettik ve silahin namlusunun ucuna yerlestirdik.
+         * BaseWeapon isimli bir class olusturduk ve bunu diger silahlar icin parent yaptik.
+         * BaseWeapon'i MonoBehaviour a extend etmis sekilde biraktik ama Pistol, Rifle ve Launcher'i BaseWeapon'a extend ettik.
+         
+         * BaseWeapon icerisinde bir adet Fire() ve bir adet FireCoroutine() olusturduk.
+         * Butun ayarlamalari yaptigimizda sorunsuz calisti ancak bir noktada soyle bir gercekle karsilastik.
+         * Pistol MouseLeftClick de tek tek her seferinde tiklama ister cunku o bir pistol
+         * Rifle ile MouseLeftClick de basili tutuldugunda makineli tufek oldugu icin seri atis yapar.
+         * Yani buradaki ihtiyac su --> Fire() fonksiyonu cocuklarda cagirildiginda her biri icin farkli bir sekilde calismali.
+         
+         * Parentta yer alan bir fonksiyonu child da cagirip farkli bir davranis gostermesi Inheritance ve Polymorphisme uygundur.
+         * Ancak Javada Override edilen parent a ait fonksiyon @Override annotation'i alarak gelirdi.
+         * C# da parenttaki fonksiyonun signature'ina biz "virtual" ifadesini ekliyoruz.
+         * C#’ta virtual anahtar kelimesi, bir metodun child class tarafından override edilebilmesine izin vermek için kullanılır.
+         * Java’dan farklı olarak C#’ta bir metod varsayılan olarak override edilemez.
+         * Override edilebilir olması için parent class’ta virtual veya abstract olarak tanımlanması gerekir.
+         * C# tasarım felsefesi:
+           
+           --> Bir metod bilinçli olarak override edilebilir yapılmalıdır.
+           
+         * Bu yüzden:
+           
+              ||-->|| Java → metodlar default override edilebilir
+           
+              ||-->|| C# → override edilebilmesi için virtual yazmak gerekir
+           
+         * C#’ta metodların varsayılan olarak virtual olmaması, encapsulation ve API güvenliği için tasarlanmıştır.
+         * Neden?
+           
+           --> C# tasarımında şu düşünce var:
+           
+                ||-->|| Bir metodun override edilmesine bilinçli olarak izin verilmelidir.
+           
+           --> Eğer her metod override edilebilir olsaydı:
+           
+                ||-->|| Child class'lar parent davranışını kolayca bozabilir
+           
+                ||-->|| API geliştiricisi kontrolü kaybedebilir
+           
+           Framework'lerde beklenmeyen davranışlar oluşabilir.
+           
+         * public virtual void Fire(bool isReleased) --> BaseWeapon'da olusturdugumuz fonksiyon
+         * public override void Fire(bool isReleased) --> Pistol ve Rifle da override ettigimiz virtual Fire fonksiyonu
+         * BaseWeapon'da [SerializeField] private GameObject fireFX; isimli bir degisken olusturduk. Bununla ates etme anina FX animasyon verecegiz (patlama animasyonu)
+         * BaseWeapon'daki fire in icerisinde bunu Instantiate ettik. Soyle ki : Instantiate(fireFX, bulletSpawnTransform.position, bulletSpawnTransform.rotation);
+         * Ancak animasyonlari Unity Inspector'da verdigimizde calismadi. Neden?
+         * Cunku override fonksiyonlar icerisinde base.Fire(isReleased) satiri yoktu. Bu satiri yazinca parenttaki fonksiyonu da aktif etmis olduk.
+         
+         * Bugun son olarak "Abstract" yapisini gorecegiz.
+         * Dusunun ki bu tasarladigim oyunda BaseWeapon class ini hicbir yerde component olarak eklemiyorum.
+         * Yani BaseWeapon sinifi aktif kullanimli sahneye eklemeli bir halde degil.
+         * Boyle durumlarda biz yalnizca belirli ayarlari veya fonksiyonlari convey edecek siniflari abstract yapmayi tercih ediyoruz.
+         * BaseWeapon sinifini abstract yaptim ve bir nesneye component olarak eklemeyi denedim. Unity buna izin vermedi.
+         * Abstract sinifi component olarak atayamazsin dedi.
+         * Abstract siniflar icerisinde abstract fonksiyonlar olusturabiliyorum.
+         * Abstract fonksiyonlarin farki ne?
+         * Abstract fonksiyonlarin body'si {} OLMAZ!
+         * body acarsan kizarir hata verir!
+         * Abstract fonksiyon der ki parentta boyle bir fonksiyon actim. Tanimini, icini doldurmayi childlara biraktim.
+         
+         * virtual ile abstract fonksiyon arasindaki en buyuk farklar :
+         * 1- Abstract fonksiyonlar sadece abstract classlar icerisinde olusturulur.
+         * 2- Virtual fonksiyonlar her tur classda olusturulabilir.
+         * 3- Abstract fonksiyonlarin body'si yoktur,o sebeple icine bir sey yazmaya izin vermez
+         * 4- Virtual fonksiyonlarin body'si vardir ve icerisine bir sey yazilabilir. Icerisine yazilan kod child icerisinde override edilen bu fonksiyonda base.FonkAdi(param) seklinde kullanilabilir.
+         * 5- Abstract fonskyionlar childlar tarafindan override edilmek ZORUNDA!
+         * 6- Virtual fonksiyonlar override edilmek ZORUNDA DEGIL!
+         
+         * Burada onemli bir bilgi de su :
+         * Interface'ler icerisinde olusturulan tum fonksiyonlar ilgili interface'e extend eden classlar tarafindan kullanilmak zorundadir.
+         */
+        
+    }
+}

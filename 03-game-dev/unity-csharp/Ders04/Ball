@@ -1,0 +1,24 @@
+using System;
+using UnityEngine;
+
+public class Ball : MonoBehaviour
+{
+    
+    [SerializeField]
+    private float jumpSpeed;
+    
+    private Rigidbody _rigidBody;
+
+    private void Start()
+    {
+        _rigidBody = GetComponent<Rigidbody>();
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.collider.tag == "Trambolin")
+        {
+            _rigidBody.linearVelocity = new Vector3(0, jumpSpeed, 0);
+        }
+    }
+}

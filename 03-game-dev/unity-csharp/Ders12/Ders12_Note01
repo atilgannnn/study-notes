@@ -1,0 +1,120 @@
+namespace Ders12
+{
+    public class ProjectNotes12
+    {
+        /*
+         * Materyaller bir oyun yapiminda en cok ihtiyac duydugumuz altyapilardir.
+         * Bizim neyi nasil renderlamak istedigimizi gonderen altyapilardir.
+         * Materyaller sadece Materials icerisinde sag tiklayip Create > Material diyerek yaptigimiz altyapilar degillerdir.
+         * Bu zamana dek yaptigimiz kodlamalar CPU (islemci) tabanli kodlardi.
+         * Ancak OpenGL, Vulcan, DirectX gibi konseptlerde ise ekran karti kodlamasina geciyoruz.
+         * Ekran karti ve islemci kodlama arasinda ucurumlar var.
+         * Ancak ekran karti kodlamalarinin ciktisini aninda gorebildigimizden ve sanatsal da bir yani oldugundan dolayi bir tik daha beyin egzersizi yapiyormus gibi hissettiriyor.
+         * Islemci tarafinda yazdigimiz kodlar arka arkaya calisir cunku islemciler seri bagli bir devre yapisina sahiptir.
+         * Islemci seri bagli bir devre elemanidir.
+         * Ekran karti ise poralel bagli bir devre elemani oldugundan birkac islemi es zamanli olarak yapma firsatina sahiptir.
+         * Dolayisiyla da hem poligon sayilari, hem gorsellerin es zamanli calismasi da bundandir. CPU(ekran karti) daha hizli calisir.
+         * Runner projemizde Shaders klasorumuzde calismalar yapiyor olacagiz.
+         * Shader'lar script, materials da onlarin ciktisi gibi dusunebiliriz.
+         * Biz projemizde URP kullaniyoruz. HDRP kullaniyor olsaydik ona gore bir shader yazimimiz olacakti.
+         * Shaders klasoru icerisinde sag tiklayip Create dedigimizde 2 secenek var. Shader ve Shader Graph. Farki ne?
+         * Shader secersek baya dumduz kod yazarak shader olusturuyoruz. Gunumuzde ama daha gorsel bloklar seklinde bunu kolay hale getirdigi icin Shader Graph tercih ediliyor. Biz de Shader Graph seciyoruz. 
+         * Shaders klasoru icerisinde sag tiklayip Create > Shader Graph > URP  dedigimizde bir suru secenek karsimiza geliyor.
+         * Create > Shader Graph > URP > Lit Shader Graph seciyoruz. Lit isik ile dogrudan etkilesim icerisinde oldugu icin onu seciyoruz.
+         * Adini S_FirstShader veriyoruz.
+         
+         * Burada 2 kavram karsimiza cikiyor : Vertex ve Fragment.
+         * Sahnede ornegin bir obje olusturduk. Bu objenin default rengi ve dokusu var. Bir de sekli yani Vertex'i var.
+         * Vertex => Sekil ile ilgili degisiklikler icin kullanilir.
+         * Fragment => Gorseli ile ilgili degisiklikler icin kullanilir.
+         * Solda bulunan S_Firstshader paneli bizim degiskenlerimizi olusturacagimiz panel.
+         * Sagdaki panel ise bizim bu materyalle ilgili bircok ayari degistirebildigimiz yer.
+         * Graph Settings => Materyalle ilgili ayarlari degistirdigimiz yer
+         * Node Settings => Ekleyecegimiz parcalarin kendi iclerindeki ayarlari duzenleyecegimiz yer.
+         * Sag alt kosedeki pencerede ise Material Preview (Materyal On izlemesi) penceresidir.
+         
+         * S_FirstShader panelinde arti (+) isaretine tiklayarak bir color degiskeni olusturdum ve adina BaseColor dedim.
+         * Bunu surukleyerek Fragment'in yanina tasidim. Degiskenimin Default Value'sunu beyaz yaptim. BaseColor degiskenimin yanindaki kirmizi buton gibi seye tiklatip Fragment'ta yer alan BaseColor a surukleyerek biraktim.
+         * Ikisi arasinda bir ipcik baglantisi oldu. Bu ne demek?
+         * Artik benim tanimladigim BaseColor buradaki BaseColor degeri olarak alinacak demek.
+         * Sahnemde ornek olmasi acisindan bir tane kure olusturmustum ancak shaderími dogrudan surukleyerek nesneye veremiyorum.
+         * Bunun icin ne yapmaliyim?
+         * Shader'in icerisinde bos bir material olusturdum. Ardindan bu materialin Inspector panelinde Shader kismina geldim.
+         * Acilan listede Shader Graphs > S_FirstShader isimli kodu sectim. Simdi bu materyali sahnedeki kureme suruklersem Shader kodum gelecektir.
+         
+         * BaseColor'i sildim. Texture eklemek istiyorum. Bunun sol ust panelde BaseTexture isminde Texture2D degiskeni olusturduk.
+         * Texture'lar 2D oldugu icin Texture2D dedik.
+         * Ancak ben Textureí dogrudan base color degeri olarak veremem. Ne yapmaliyim?
+         * BaseTexture2D degiskenini panelin ortasina surukledim ve yanindaki kirmizi noktadan ipi cekip bosluga birakinca bir "Create Node" paneli acildi.
+         * Acilan panelde "Sample Texture 2D : Texture(T2)" sectim. Bu panel verdigim texture degerini burada RGB'ye donusturecek ve bunu da ben Basecolor olarak Fragment'in Base Color'ina baglayacagim.
+         
+         * Gelelim kaliteli bir material olusturmaya.
+         * PVR (Photo Realistic Material) larda bir base texture eklenir. Buna Smoothness, Metallic eklenir. Ambient Occlusion eklenir.
+         * Bununla ilgili gorsel denemeleri derste yaptik. Ardindan hoca Blender'da baska bir sey daha gosterdi.
+         * Biz Blender'da bir objeye material ekledigimizde bu eklenen materyali hareket ettirerek aslinda nesne hareket ediyormus gibi bir iluzyon yaratabiliyoruz.
+         * Shader panelinde Space'e basinca acilan Create Node panelinde "Tiling and Offset" seciyoruz.
+         * Tiling and Offset su ise yariyor :
+         * Offset : Texture'in modelin koordinat duzleminde konumunu ayarladigimiz yer.
+         * Tiling : Texture'i model uzerinde buyutup kucultur.
+         * Tiling and Offset'i BaseColor Sample Texture 2D'de UV'ye bagliyoruz.
+         * Ben bu texture'i hareket ettirmek istiyorum.
+         * Bunun icin Shader Panel'de Create Node > Time seciyoruz.
+         * Time'i Offset'e bagladik.
+         * Burada X ve Y ekseninde Offset'i elle ayarlayabilmek icin ayri ayri XSpeed ve YSpeed floatlari olusturduk. Ardindan Multiply node'lari create ettik 2 tane. Birinin A'sina X degeri, B'sine Time verdik.
+         * Digerinin de A'sina Time ve B'sine Y degeri verdik.Bu 2 multiply outlarini da Vector2 nodeúna X ve Y degerleri olarak yolladik.
+         * Vector2 outunu da Tiling and Offset'in Offset degerine bagladik.
+         
+         * Ben Base Texture umu panele getirdim ve Bir tane Sample Texture 2D olusturdum.Base Texture'imi buna bagladim.
+         * Sol ustteki panelde bir tane de color turunden Base Color isimli bir degisken olusturdum.
+         * Eger ben bir tane de Multiply node u create edersem ve A degerine Base Color ve B degerine de Sample Texture 2D nin RGB degerini baglarsam bu iki degiskeni ust uste bindirmis olurum.
+         * Buna Tint etmek deniyormus.
+         
+         * Normal Texture'lara Sample Texture 2D baglantisi kurarken Sample Texture 2D'nin Type'ini Normal secmeliyiz.
+         * Bunun sebebi Normal Texture'in hesaplanma seklinin daha farkli olmasi.
+         * Sol ustteki panelde floaty turunde NormalIntensity degiskeni olusturdum. Bunun out'unu Multiply diyerek panelde actigim multiply nodunun A degerine verdim.
+         * Multiply'in B degerine de Normal Texture'un Sample Texture 2D'sinin RGB'sini verdim.
+         * Boylece ben NormalIntensity degerini arttirdikca Normal Texture'un yogunlugunu da arttirmis oldum.
+         
+         * Simdi Base Texture, Normal Texture, Smoothness ve Ambient Occlusion icin ayni islemleri yaptik. Metallic icin float degerinde bir deger atadik o kadar.
+         * Ardindan Offset Grubunun Tiling and Offset out degerini her bir Texture'in UV sine bagladik ki her biri es zamanli hareket etsin veya buyuyup kuculsun.
+         
+         * Offset'de bir yontem daha ogrendik. XSpeed ve YSpeed i kaldirdik. Sol ustteki panelde bir tane Vector2 turunde OffsetVector isimli bir degisken olusturduk.
+         * Daha sonra ortadaki panele bundan 2 tane surukledik ve her ikisini de Split nodelari ile bolduk. Ilkinin R degerini (X degerine tekabul ediyor), ilk multiply'in A sina bagladik.
+         * Ikinci split'in de G degerini (Y ye tekabul ediyor) ikinci multiply'in B'sine bagladik.
+         * Bu bize nasil bir avantaj sagladi?
+         * Ayri ayri speed degiskeni olusturmadik. Tek bir Vector degiskeni ile hem x hem de y ye mudahale edebiliyor olduk.
+         
+         * Soldaki panelde bir tane de Vector2 turunde TilingVector isminde bir degisken olusturduk ve bunu dogruca Tiling and Offset'in Tiling degerine bagladik.
+         
+         * Peki Vertex'ler ile ilgili islemleri nasil yapariz. Mesela Vertex'lerin pozisyonlarini degistirelim.
+         * Panelde bolsukta Space > Position yazinca Geometry altinda Position secenegi gelecektir bunu tikliyoruz.
+         * Space kismini da simdilik Objenin kendisine gore pozisyon alacagimiz icin Object olarak seciyoruz.
+         * Space > Time ile bir tane de Space > Multiply olusturduk.
+         * Position'in out'unu Multiply'a A degeri olarak verdik. Time'in Sine Time'ini da B degeri olarak verdik.
+         * Multiply'in out'unu da Vertex'e position degeri olarak verdik.
+         
+         * Vertex Normal ile Normal Map'i karistirmayin. Vertex Normal'i bir nesnedeki Vertex'lerin baktigi yon gibi dusunulebilir.
+         
+         * Bizler panelde Space tusuna bastigimizda tezturelar arasindaki iliskiyi hep Multiply ile kurduk.
+         * Ancak dort islemi yani Multiply, Divide, Add ve Subtract'in tumunu burada uygulayabiliriz.
+         * Burada onemli bir nokta var : Multiply ile yaparken A ve B degerlerinin siralamasi onemli degil.
+         * Ancak Add, Subtract ve Divide islemlerinde A ve B degerlerinin sirasi onemli.
+         * Yani A yi mi B ye boluyorsun ya da B yi mi A ya boluyorsunun sonucu farkli oldugu icin texture ciktilari da farkli oluyor.
+         
+         * Biz Lava'ya dalga efeti vermek icin Height Texture kullanacaktik ama bir sorun cikti derste texture ile ilgili.
+         * Texture'in ciktisini Vertex Position'a dogrudan veremedik cunku turler uyusmadi gibi geldi bana.
+         * Bu sebeple bir tane Voronoi ve bir tane de Gradient Noise olusturduk. Ardindan bir tane de Blend olusturduk.
+         * Blend soyle calisir : Ust uste ekler, mixler.
+         * Mesela Base 1 texture Voronoi, Base 2 texture Gradient Noise ise bu Voronoi'yi Gradient Noise'a blendlemek, eklemek istiyorum demektir.
+         * Burada onemli olan Blend icerisindeki Mode kismi. biz bir dalga goruntusu istedigimiz icin Mode'u Screen yaptik.
+         * Blend ciktisini Position ciktisiyla Multiply ettik ve Multiply ciktisini Vertex Position'a bagladik.
+         
+         * Derste hocanin Blender'da olusturdugu assetleri kullanmistik. Burada zemindeki lava etkisi icin bir plane kullanmistik.
+         * Hoca burada baya ugrasti ve takildi. Sebebi de suymus sonra anladik : Hocanin hazirladigi plane i Blender da scale ederken positionlar 0 - 0 - 0 ve olcekler 1 - 1 - 1 olmaliymis.
+         * Ancak o olcegi buyutup duzeltmeden export etmis.
+         * Bu yuzden gokyuzunden isin yagan bir gorunum olustu texture'i plane e verince.
+         * Height map ile ilgili de denemeleri oldu ama cozemedi. Buna daha sonra bakacagim dedi.
+         * Simple noise, Contrast ve Normal Vectorleri panelin ortasinda create ederek gerekli multiply islemleri yapti. Bunlara donus saglamak icin de time verdi.
+         */
+    }
+}

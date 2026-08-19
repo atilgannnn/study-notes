@@ -1,0 +1,122 @@
+using System;
+using UnityEngine;
+
+public class Astra : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private GameObject cameraPivot;
+    [SerializeField] private Animator animator;
+    
+    
+    private Rigidbody _rigidbody;
+    private float _forwardValue;
+    private float _rightValue;
+    private Vector3 _moveDirection;
+    private Vector3 _deltaMousePos;
+
+    private void Start()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.W))
+        {
+            // animator.SetBool("IsMoving", true);
+            _forwardValue = 1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            // animator.SetBool("IsMoving", false);
+            _forwardValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.S))
+        {
+            _forwardValue = -1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            _forwardValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.D))
+        {
+            _rightValue = 1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            _rightValue = 0;
+        }
+        
+        if (Input.GetKey(KeyCode.A))
+        {
+            _rightValue = -1;
+        }
+
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            _rightValue = 0;   
+        }
+        
+        animator.SetFloat("ForwardFloat", _forwardValue); // Bu yapi ile biz 
+
+        _moveDirection = (transform.forward * _forwardValue) + (transform.right * _rightValue);
+        
+        _rigidbody.linearVelocity = _moveDirection * moveSpeed;
+        
+        _deltaMousePos = Input.mousePositionDelta;
+        // Bu kisimda neden eulerAngles olarak aldik anlamadim. Hocaya sor!
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x,transform.rotation.eulerAngles.y + (_deltaMousePos.x * mouseSensitivity), transform.rotation.eulerAngles.z);
+        transform.rotation = targetRotation;
+        
+        Quaternion targetCameraRotation = Quaternion.Euler(cameraPivot.transform.eulerAngles.x + _deltaMousePos.y, cameraPivot.transform.eulerAngles.y, cameraPivot.transform.eulerAngles.z);
+        cameraPivot.transform.rotation = targetCameraRotation;
+    }
+    
+    /*
+     * Characterler mixamo dan alindiginda hazir bir iskelet sistemiyle geliyorlar (spine vs)
+     * Gelen karakter iskeleti hareket ettirilerek animasyonlar olusturuluyor.
+     * Astra yi hareket ettirirken biz Astra'nin iskeletinin mixamorig den basladigini gorduk Unity de ve orada islem yaptik.
+     * Bunun icin mixamorig in bulundugu yere Inspector dan animator ekledik.
+     * Animator ekledik ama Controller'imiz yok. Bunun icin de bir tane yeni controller olusturduk.
+     * Assets kalsorunun icerisine sag tiklayarak Create > Animation > Animator Controller olusturduk.Ismini AC_Character verdik.
+     * Daha sonra bunu mixamorig in icerisinde olusturdugumuz animator daki Controller kismina surukleyip birakiyoruz.
+     * AC_Character'a cift tikladigimizda bir graph karsimiza cikiyor. Burada da animasyon eymelmlerini birbirine bagliyoruz.
+     * Mesela indirdigimiz animasyonlardan Idle'i surukleyip bu graph in icine birakirsak, animasyon burada belirtiliyor.
+     * Oyun basladiginda entry den otomatik akis gerceklesecegi icin Idle i atar atmaz Entry'ye bagladi.
+     * Simdi normalde Idle calismaliydi ama burada mixamo dan dolayi animasyonu almadi cunku biz animator i mixamorig de olusturduk.
+     * Boyle olunca dogrudan Astra'ya verdik ve oldu.
+     * Burada Skinned Mesh Renderer diye bir component var. Bu da bizim charaterimize ait Root Bone gibi veya bounds gibi datalara sahip.
+     * Animasyonu tanimladigimizda 1 kere oynuyor. Bunu surekli oynatmak icin ilgili animasyonun Inspector kismina gelerek Lopp Time ve Loop Pose u tikliyoruz.
+     
+     
+     * Peki ben bu animasyonlari nasil ayarlayacagim? Nasil sekanslara bolecegim?
+     * Bunun icin graph a 2 animasyon atiyoruz. Idle ve Walk animasyonlarini.
+     * Bir animasyona graph da sag tiklayip Set As Layer Default State dersek o animasyon Default olarak Entry den baglanir.
+     * Bir animasyondan digerine gecis baglanti ipi eklemek icin bulunulan animasyona sag tiklayip Make Transition dersek ok isaretli bir ipcik olusacak.
+     * Bu ipcigi gecis yapilmak istenen animasyona dogru surukluyoruz. Boylece iki animasyon birbirine baglanmis oluyor.
+     * Graph uzerinde denedigimizde calisiyor ancak benim bunu bir animasyondan digerine gecerken kodu dinle demem lazim.
+     * Bunu nasil yaparim? Burada once sunu gorduk. Transition ipciklerine tikladigimizda orada ipciklerin Inspector panelini acinca 'Has Exit Time' in tikli oldugunu gorduk.
+     * Has Exit Time tiki kaldirilirsa animation'in durma komutu olmadigi icin animasyondan cikamayacak yani infinite loop a girecek.
+     * Animator in icerisinde solda Parameters kismina geldik ve orada yeni bir parametre olusturduk. Ismine de isMoving dedik.
+     * Idle dan walk a gecerken isMoving = true , walk dan idle a gecerken isMoving = false setlemeliyiz.
+     * Iste bu kismi kodlayarak ayarlayacagiz.
+     * Yukarida Animator degiskenini tanimladik. Unity de Astra'nin icerisindeki Animator componentini de surukle birak yaparak olusan Animator field ina attik.
+     
+     
+     * Ileri ger yurume animasyonlarim istenildigi gibi calisiyor ama elimi cekince idle a gecmiyor ve yurume animasyonu oynamaya devam ediyor.
+     * Peki bu durumda ne yapmaliyim?
+     * Bunun icin walk dan idle a gecisteki ForwardFloat degerini Less dan 1 yapmam gerekir cunku W ya basinda 1 degeri aliyorum yukaridan. Idle 1 degil 1 den kucuk.
+     * Idle dan backwalk a gecerken forwardFloat degerimin 0 den kucuk olmasi lazim ki bu dogru cunku S degeri -1 veriyor.
+     * Ancak backwalk dan idle a gecerken degerimin 0 dan degil -1 den buyuk olmasi lazim. Koduma gore duzeltmem gerekiyor.
+     * Referans noktam kodum! Kodum da kodum! <3
+     */
+}
+ 

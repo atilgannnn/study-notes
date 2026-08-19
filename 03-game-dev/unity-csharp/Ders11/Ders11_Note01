@@ -1,0 +1,156 @@
+namespace Ders11
+{
+    public class ProjectNotes11
+    {
+        /*
+         * Her yeni parkur spawninda Z-Fight denilen bir seyle karsilastik.
+         * 2 Nesne ust uste bindiginde nesne goruntusunde dalgali bir grafik goruntusu olusuyor. Hatali bir goruntu bu.
+         * Bunu engellemek icin pardur baglantilarinin tam uc noktalara denk gelmesini ayarlamamiz gerekiyor ki overlap olmasin.
+         
+         * Bir diger problem ise fullground un spawnlanmasindan once karsiyi biz bosluk olarak goruyoruz. Bunu cozmenin 3 yolu var.
+         1 - Ya Spawn Trigger'ini oyunun basladigi yere kadar getirecegiz ki bosluk gorme ihtimali engellensin.
+         2 - Bos bir plane olusturup bunu fullground'un sonuna ekleyecegiz ki ileride bosluk oldugunu maskeleyelim.
+         3 - Main Camera Inspector'inda Environment icerisinde Background Type = Solid Color secip, Color degeri olarak Fog rengi degerini vermek.
+         * Genelde linear sekilde ilerleyen runner turu oyunlarda sis efekti eklenerek ufuktaki bosluk gizlenir.
+         * Biz projemizde buna ek olarak plane de kullanacagiz.
+         * Bu plane i Runnercharacter'in icerisindeki Main Camera'nin icine atiyoruz.
+         * Boylece Runner Character hareket ettikce main camera hareket edecek. Buna bagli olarak da plane hareket edecek.
+         
+         * Ana menu yapiminda ayri bir scene olusturduk ve burada camera hareketiyle bir giris yapmaya karar verdik.
+         * Ardindan Unity de oyunun girisinde verecegimiz Start ve Quit gibi menulerin oldugu UI yapisini olusturduk.
+         * Burada belirtmemiz gerekir ki Unity de 2 adet UI sistemi vardir (UI ve UI Toolkit). Biz en yaygin ve eski olan orijinalini yani UI sistemini kullandik.
+         * UI da en onemli olan 2 sey Canvas ve Event System'dir.
+         
+         * Canvas yoksa UI yapamazsiniz!
+         * Canvas'i olusturduk. Icerisine bir tane Text-TextMesh olusturduk. Acilan panelde iki secenege sirasiyla import et diyoruz.
+         * TextMesh'in Inspector'ina gelirsek Text Input kismindan istedigimiz yaziyi ekleyebiliriz.
+         * Text ekledikten sonra bir buton ekliyoruz. Eklenen butonun boyutunu sakin scale ile yapma cunku sadece scale degisir. Biz width ve height ile degistirecegiz.
+         
+         * Main menuden oyuna gecerken fade in animation eklemek istiyorum.
+         * Bunun icin Window > Animation > Animation seçiyorum. Açılan pencereyi console hizasına getiriyorum.
+         * Ardından canvas a tıklayıp animation panelinde "Create" seçiyorum. İsmini AN_UI koyuyorum.
+         * Fade in image dakı Alpha degerini almam gerek. İlk önce kayda basıp Alpha değerini sıfır olarak ayarlıyorum.
+         * Sonra animation panelindeki oku 1:00 sn ye getirip Fade in alpha değerini 1 e çekiyorum ve kaydı durduruyorum.
+         * Animation"ım otomatik olarak oluşturuldu ve animator da da create edildi.
+         * Animator da bos bir state oluşturdum ve adını IDLE STATE verdim.
+         * Entry yi default olarak Idle state e bağladım.
+         
+         * Idle state den AN_UI a geçerken Trigger ekledim ve adını StartGame koydum.
+         * Animator'u Opening file içerisinde [SerializeField] private Animator canvasAnimator olarak aldık.
+         * StartGame isminde bir fonksiyon oluşturduk aynı yerde. Bunun içinde de canvasAnimator.SetTrigger("StartGame") dedik.
+         * Opening Script içerisinde Inspector da Canvas Animator inputu geldi. Buraya sahnedeki Canvas'ı sürükleyip bıraktık.
+         * Play e bastığımda bu işlemin çalışmadığını gördük. Çünkü bizim aslında şu anda fade in imageımız butonun önünde. bu image her yeri kapatıyor.
+         * Eğer ki herhangi bir UI elementi bir başka elementi kapatırsa tıklamayı engeller.
+         * Bunu duzeltmek ıcın Hıerarchy de Canvas ın içerisinde nesneleri sırasıyla yukarıdan aşağıya FadeInImage, TXT_Label ve Button olarak düzeltiyoruz.
+         * Böylece Button en önde, FadeInImage en arkada konumlanmış oluyor.
+         
+         * Buton çalışıyor ancak biz Play'e tıkladığımızda hala Play button ı sahnede görmeye devam ediyoruz. Bunu nasıl yok ederiz?
+         * Burada Canvas'ın içine bir tane boş game object oluşturuyoruz ve adını MainMenu diyoruz.
+         * Text ve butonu bunun içine atıyoruz.
+         * Artık şunu diyeceğiz : Play e tıklanınca buton ve texti sahneden kaldır.
+         * Opening içerisinde bir field daha oluşturuyoruz ve adını [SerializeField] prıvate GameObject maınMenuObject veriyoruz.
+         * StartGame fonksiyonunda mainMenuObject.SetActive(false) diyoruz ki oyun başladığında mainMenu'nün görünürlüğünü ortadan kaldırmış oluyoruz.
+         * SetActive bizim Inspector'da Tag'ın üstündeki küp ikonunun yanında yer alan tikli kutuyu açıp kapatır.
+         * Inspector daki Opening Script içerisinde Main Menu Object fieldı oluşturuldu. Buraya MainMenu yu sürükleyip bırakıyoruz.
+         * Her şey istediğimiz gibi çalışıyor ancak animasyon döngüde çalışıyor.
+         * AN_UI'ı Inspector da açıp Loop Time'ını kapatıyoruz.
+         
+         * Animasyon bitince ana oyun sahnesine geçmiyor. Bunu nasıl yapacağız?
+         * Opening içerisinde LoadScene isimli bir fonksiyon create ettik.
+         * Bu fonksiyon içinde SceneManager.LoadScene("S_RunnerScene"); diyerek ana sahneden oyun sahnesine geçtik.
+         * Animasyon bittiğinde sahne değişimi olacğı için Canvas'daki animation a geri geliyorum. Animason 2.saniyede bitince ben sahne değişimi istediğim için ok şeklindeki imleci 2:00 ye çekiyorum.
+         * Daha sonra Animation panelindeki AN_UI ın yanında dikey kapsül şeklindeki icon a tıklıyoruz (Add Event iconı)
+         * Buraya bir event eklendi. Bu eventi tetiklemek için buraya bir fonksiyon eklememiz gerekiyor. Fonksiyonumuz Opening scriptinin içerisinde.
+         * Canvas'ın içeriisnden buna şu an ulaşamıyorum çünkü fonksiyon Opening script içeriisnde. Bunun için opening script componentini kopyalayıp Canvas'ın içerisine Add Component As New diyerek yapıştırıyorum.
+         * Opening Game Object i siliyoruz. Animation eventini Inspector'da açıp Function > Opening > LoadScene fonksiyonunu seçiyorum.
+         * Bunu illa böyle yapmamıza gerek yok. StartGame dedikten sonra LoadScene için 2 sn sonra başlayacak şekilde Coroutine de oluşturabiliriz.
+         * Opening i sildiğim için button çalışmıyor. Button a geri geldim. On Click event i içerisinde StartGame gitmiş çünkü Opening i silmiştik.
+         * Canvas'ı sürükleyip buraya bırakıyorum. No function yazan kısımda Opening > StartGame fonksiyonunu seçiyorum.
+         * Bir hata aldım. Hatada diyor ki ben sahneyi buldum ancak yükleyemedim.
+         * Unity de sahne ayarları ile ilgili bir panel var. Bu panele sahnelerimi tanımlamam gerekiyor.
+         * File > Build Profile > Scene List diyerek oyunda kullanacağımız sahneleri buraya eklıyoruz.
+         * Sahneleri Scenes klasöründen buraya sürükleyerek ekliyoruz.
+         * Yukarıdan aşağıya ilk sahneden son sahneye göre bir hierarchy ile ilerlediğinden S_MainMenu (0) ve S_RunnerScene (1) olacak şekilde düzenliyorum.
+         * Bazen oyunlarda sahne adı ile değil bu başındaki index numaraları ile de sahne çağırma işlemi yapılabiliyor.
+         *  runnerScene içeriisnde Canvas açıp içerisinde AN_Fadeout objesi oluşturuyoruz. Bunun da animasyonunu yapıp Loop time'ını kapatıyorum.
+         
+         * Sımdı topladıgımız altın ve can bilgisini ekrana yazdırmak istiyorum.
+         * Canvas içine UI elementlerinden bir image ekliyorum. Image Inspector da Source Image kısmında "Knob" seçerek yuvarlak bir image elde ediyorum. Scale edip ekranın sol üst köşesine konumlandırıyorum.
+         * Bunları duplicate edip 3 tane can barı elde ediyorum. Her canımız gidince bir tane knob silinecek.
+         * Canvas içine yeni bir create empty object diyerek knob image ları içine atıyorum.
+         * Bir text object create edip scale ettik ve adını Gold verdik. Sonra bunu da duplicate ettik ve yanına yerleştirdik ki bu yazıda da 1-2-3 gıbı altın topladıkça bu sayı artacak.
+         * Duplıcate ettıgımız textin adını goldText verdik.
+         * Scripts de bir UIManager Script i oluşturduk.
+         * UI Manager'ı Canvas'ın içine ekledik.
+         * UI Manager'ı açtık. Gold text ini değişken olarak tutmamız gerekiyor.
+         * UI Manager içerisinde [SerializeField] private TextMNeshProUGUI goldText adında bir değişken oluşturduk.
+         * Aynı yerde bir de prıvate ınt _totalGold oluşturduk.
+         * public void UpdateGold() isimli bir fonksiyon oluşturduk.
+         * Canvas'da oluşan goldText fieldına GoldText i sürükleyip bıraktık.
+         * UpdateGold içerisinde _totalgold++; ve goldText.text = totalGold.ToString(); tanımladık.
+         * Gold Script içerisinde fıeld Injection yaparak private UIManager _uiManager; çağırdık.
+         * private void Start fonksiyonu içerisinde _uiManager'ı tanımladık.
+         * _uiManager = FindAnyObjectByType<UIManager>(); diyoruz.
+         * FindAnyObjectByType<UIManager>() bu kullanım sahnede eğer UIManager isminde bir script varsa bunu değişkene atıyor.
+         * Yalnız burada dikkat etmek gereken şey şu : Eğer sahnede aynı isimle birden fazla obje varsa bu atama şekli yalnızca ilk bulduğunu bulup atıyor.
+         * Bu yöntemi sahnede sadece 1 tane olan sınıflarda yapmamız öneriliyor.
+         * OnTriggerenter'da _uiManager.UpdateGold() u çağırıyoruz.
+         * Altın sayacı çalışıyor.
+         
+         * Can konusuna gelirsek, AstraController'da public void HitObstacle() isimli bir fonksiyon oluşturduk.
+         * Obstacle OnCollisionenter'da Startcoroutine(collidedController.PushCharacter) demiştik.
+         * AstraController içerisinde private UIManager _uiManager; değişkenini oluşturduk.
+         * AstraController da Start'da sahnedeki UI Manager'ı tanımlıyorum.
+         * Burayı collidedController.OnHitObstacle(); diyerek düzeltip, OnHitObstacle içerisinde StartCoroutine(PushCharacter()) diyeceğiz.
+         * Ayrıca burada health--; diyoruz. Altına da _uiManager.UpdateHealth(_health); diyoruz.
+         * Altında da if(_health <= 0) {
+         *      _rigidbody.linearVelocity = Vector3.zero;
+         *      _startGame = false;
+         * } else {
+         *      StartCoroutine(PushCharacter());
+         * }
+         *
+         * UI Manager da public void UpdateHealth(int health) fonksiyonu oluşturduk.
+         * UI Manager içerisinde [SerializeField] private GameObject[] healthBars; dizisini oluşturduk.
+         * Inspector'da healthbars içerisine HealthBar nesnesi içerisindeki üç image ı da sürükleyip bıraktım.
+         * UpdateHealth içerisinde de healthBars[health].SetActive(false); diyerek ayarlıyoruz.
+         
+         * Death Animation'ını da animator da any state de cağırıyoruz. Any state den death e giderken bir tane Death Trigger'ı ekliyoruz.
+         * Aşağıdaki koda SetTrigger eklemesi yapıyoruz. böylelikle ölme animasyonu devreye giriyor.
+         * if(_health <= 0) {
+         *      _rigidbody.linearVelocity = Vector3.zero;
+         *      _startGame = false;
+         *      _animator.SetTrigger("Death");
+         * } else {
+         *      StartCoroutine(PushCharacter());
+         
+         * Ölme animasyonundan sonra oyunu yeniden başlatmak için AstraController içerisinde public IEnumerator EndGame() isimli bir fonksiyon oluşturuyoruz.
+         * İçerisinde yield return new WaitForSeconds(5f); dedik ve SceneManager.loadScene("S_RunnerScene"); dedik.
+         * EndGame'i yukarıdaki if içerisinde health 0 ve daha az olduğunda çağırıyoruz. StartCoroutine(EndGame()); diyoruz.
+         * Böylece artık karakter öldüğü zaman sahne yeniden başlayacak.
+         
+         * "Press T To Play" yazısını da Canvas da düzenleyip, animatorde animasyonunu ekleyip daha sonra UI Manager içerisinde [SerializeField] private GameObject textInfo; değişkenini oluşturduk.
+         * UI Manager'da private void StartGame() fonksiyonu oluşturup içerisinde infoText.SetActive(false) dedik.
+         * AstraController'da T ye bastığımız Keycode kısmında _uiManager.StartGame(); diyerek fonksiyonu burada çağırdık.
+         * Canvas Inspector'a geldik. Burada Info Text fieldına PressTToPlay nesnesini sürükleyip bıraktık.
+        
+         * Altın ve Obstacle materyallerini Materials içerisinde oluşturduk.
+         * Particle'lar ile ilgili bir ekleme de yaptık. Unity Asset Store'da Cartoon FX Remaster assetini indirdik ve projeye yükledik.
+         * Unity de Window > Package Manager > My Assets assetlerimizi görüntüleyebileceğimiz yer.
+         * Gold Scripte geliyoruz. [SerializeField] private GameObject particlePrefab; tanımlıyoruz.
+         * OnTriggerEnter'da  if içerisinde GameObject particle = Instantiate(particlePrefab, transform.position, transform.rotation); diyoruz.
+         * Bu şekilde altının bulunduğu konum ve rotasyonda particle'ı spawn ediyoruz.
+         * Gold prefab'i içerisinde Gold Scriptte Particle Prefab fieldı geldi. Buraya Particle Prefabimizi sürüklüyoruz.
+         * Particle'lar scale edilebilir. OnTriggerEnter'da particle'ın altına particle.transform.localScale = new Vector3(0.6f,0.6f,0.6f); dedik.
+         
+         * Son olarak ses eklemek için Pixabay i kullandık. burada indirilen seslerde lisans koşullarına dikkat etmeliyiz ki ticari amaçla kullanıldığında bize bir sorun yaşatmasın.
+         * Sound Effect kısmından veya Music kısmından ses dosyalarını indirdik.
+         * Bu sesleri runner klasöründe Sounds'un içine attık.
+         * Background music eklemek için hierarchy de Create empty diyerek nesne oluşturduk. Adını BackgroundMusic verdik.
+         * BackgroundMusic'e Inspector'dan bakınca Add Component'e tıklayarak Audio Source oluşturuyoruz.
+         * Audio Generator'a indirdiğimiz Background Music'i atıyoruz.
+         * Play on Awake (Başlatınca ses çalmaya başlayacak) ve Loop (Müzik bitince başa alacak) seçeneklerini tikliyorum.
+
+         */
+    }
+}   

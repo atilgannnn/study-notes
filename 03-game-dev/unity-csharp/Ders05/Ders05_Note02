@@ -1,0 +1,44 @@
+using System;
+using UnityEngine;
+
+public class Door : MonoBehaviour
+{
+    [SerializeField] private bool isRotatingDoor;
+    
+    [SerializeField] private GameObject d1Parent;
+    [SerializeField] private GameObject d2Parent;
+
+    [SerializeField] private Quaternion d1Rot;
+    [SerializeField] private Quaternion d2Rot;
+
+    [SerializeField] private Vector3 d1Pos;
+    [SerializeField] private Vector3 d2Pos;
+
+    [SerializeField] private float d1Speed;
+    [SerializeField] private float d2Speed;
+
+    
+    private void Update()
+    {
+        if (isRotatingDoor == true)
+        {
+            d1Parent.transform.localRotation = Quaternion.RotateTowards(d1Parent.transform.localRotation, d1Rot, d1Speed * Time.deltaTime);
+            d2Parent.transform.localRotation = Quaternion.RotateTowards(d2Parent.transform.localRotation, d2Rot, d2Speed * Time.deltaTime);
+        }
+        else
+        {
+            d1Parent.transform.localPosition =
+                Vector3.MoveTowards(d1Parent.transform.localPosition, d1Pos, d1Speed * Time.deltaTime);
+            d2Parent.transform.localPosition = 
+                Vector3.MoveTowards(d2Parent.transform.localPosition, d2Pos, d2Speed * Time.deltaTime);
+        }
+    }
+    
+    /*
+     * Yukaridaki kodda sahnemde elle bir kapi yaptim. Kapinin iki turlu acilma sekli var. Rotate ile ve slide ile acilma.
+     * Yukaridaki kodda yer alan boolean ile hangi sekilde acilacagini secip ona gore bir if bloguna giriyor ve kapi aciliyor.
+     * Bu kod cok junior level bir yazima sahip. Ancak is goren bir kod. Daha basit yontemlerle yapilabilir ancak henuz biz onu gormedik.
+     * Burada en onemli husus yine localPosition ve localRotation kullanarak parentin localine gore Rotate veya Slide vermemiz.
+     * Hoca dedi ki genelde local e gore yazilir tum bu fonsiyonlar. Bazi durumlarda globale gore yapman gerekebilir ama sik degildir.
+     */
+}

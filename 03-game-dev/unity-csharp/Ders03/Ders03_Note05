@@ -1,0 +1,34 @@
+using UnityEngine;
+
+public class MyFirstScript : MonoBehaviour
+{
+
+    public float forwardSpeed = 5;
+    
+    public Vector3 targetPosition;
+    
+    private Vector3 _directionVector;
+    
+    public Quaternion targetRotation;
+    
+    void Start()
+    {
+    }
+
+    void Update()
+    {
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 20 * Time.deltaTime);
+    }
+    
+    /*
+     * Butun bu bir noktadan digerine harekette hesaplamalari yapmak yerine Vector3.MoveTowards() kullanabiliriz.
+     * // Vector3.MoveTowards(bulundugun konum, gitmek istedigin konum, hiz)
+       transform.position = Vector3.MoveTowards(transform.position, targetPosition, forwardSpeed * Time.deltaTime);
+     
+     * Peki ayni sekilde rotasyon icin de buna benzer bir sey yapabilir miyiz? KESINLIKLE!
+     * // Quaternion.RotateTowards(bulundugun aci, donmek istedigin aci, hiz)
+     * transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 20 * Time.deltaTime);
+
+     */
+
+}
